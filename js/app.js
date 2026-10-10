@@ -49,6 +49,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Modal Elements
   const modalOverlay = document.getElementById('project-modal');
   const modalCloseBtn = document.getElementById('modal-close-btn');
+
+  // -----------------------------------------------------------------
+  // Security XSS Defense Helper
+  // -----------------------------------------------------------------
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
   
   // =================================================================
   // Authentic Tech Official Vector Logos
@@ -242,9 +255,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (syncDot) syncDot.style.background = 'var(--accent-emerald)';
       if (syncStatusText) {
-        syncStatusText.innerText = syncResult.state.source === 'api'
-          ? 'GitHub 실시간 연동됨 (최신)'
-          : 'GitHub 캐시 연동 모드';
+        if (syncResult.state.isRateLimited) {
+          syncStatusText.innerText = 'GitHub API 호출 한도 도달 (캐시 유지)';
+        } else {
+          syncStatusText.innerText = syncResult.state.source === 'api'
+            ? 'GitHub 실시간 연동됨 (최신)'
+            : 'GitHub 캐시 연동 모드';
+        }
+      }
+
+      if (force) {
+        if (syncResult.state.isRateLimited) {
+          showToast('⚠️ GitHub API 1시간 호출 한도(60회)에 도달하여 보관된 캐시 데이터로 표시합니다.');
+        } else {
+          showToast('GitHub 최신 정보가 성공적으로 동기화되었습니다.');
+        }
       }
 
       if (syncDiffSummary) {
@@ -259,6 +284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         statTotalRepos.innerText = allRepositories.length.toString();
       }
 
+      readUrlFilters();
       renderNewSection();
       renderCategoryTabs();
       renderTechLogoGrid();
@@ -271,6 +297,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (syncStatusText) syncStatusText.innerText = '오프라인 기준 데이터 모드';
       if (syncDot) syncDot.style.background = 'var(--accent-rose)';
       allRepositories = (typeof REPOSITORIES_DATA !== 'undefined') ? REPOSITORIES_DATA : [];
+      readUrlFilters();
       renderCategoryTabs();
       renderTechLogoGrid();
       applyFiltersAndRender();
@@ -306,35 +333,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         : `background: ${proj.gradient};`;
 
       return `
-        <div class="featured-card" data-id="${proj.id}">
+        <div class="featured-card" data-id="${escapeHtml(proj.id)}">
           <div class="featured-banner" style="${bannerBg}">
             <div class="featured-banner-overlay"></div>
             <div class="featured-badge-list">
-              <span class="featured-badge highlight">${proj.badge || proj.categoryName}</span>
-              <span class="featured-badge">${proj.period}</span>
-              <span class="featured-badge">${proj.team}</span>
+              <span class="featured-badge highlight">${escapeHtml(proj.badge || proj.categoryName)}</span>
+              <span class="featured-badge">${escapeHtml(proj.period)}</span>
+              <span class="featured-badge">${escapeHtml(proj.team)}</span>
             </div>
           </div>
           <div class="featured-body">
-            <h3 class="featured-title">${proj.title}</h3>
-            <p class="featured-subtitle">${proj.subtitle}</p>
-            <p class="featured-desc">${proj.description}</p>
+            <h3 class="featured-title">${escapeHtml(proj.title)}</h3>
+            <p class="featured-subtitle">${escapeHtml(proj.subtitle)}</p>
+            <p class="featured-desc">${escapeHtml(proj.description)}</p>
             <div class="featured-tags">
-              ${proj.tags.slice(0, 5).map(t => `<span class="tag-pill">${t}</span>`).join('')}
+              ${proj.tags.slice(0, 5).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('')}
             </div>
             <div class="featured-footer">
               <div class="lang-indicator">
                 <span class="lang-dot" style="background-color: ${proj.languageColor};"></span>
-                <span>${proj.language}</span>
+                <span>${escapeHtml(proj.language)}</span>
               </div>
               <div class="action-btn-group">
-                <button class="btn-detail" onclick="openProjectModal('${proj.id}')">
+                <button class="btn-detail" onclick="openProjectModal('${escapeHtml(proj.id)}')">
                   ${ICONS.info} <span>상세 분석</span>
                 </button>
-                <a href="${proj.githubUrl}" target="_blank" rel="noopener noreferrer" class="btn-repo-link" title="GitHub 방문">
+                <a href="${encodeURI(proj.githubUrl)}" target="_blank" rel="noopener noreferrer" class="btn-repo-link" title="GitHub 방문">
                   ${ICONS.github}
                 </a>
-                <button class="btn-repo-link" onclick="copyCloneCommand('${proj.name}')" title="git clone 명령어 복사">
+                <button class="btn-repo-link" onclick="copyCloneCommand('${escapeHtml(proj.name)}')" title="git clone 명령어 복사">
                   ${ICONS.copy}
                 </button>
               </div>
@@ -429,6 +456,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return `
         <button class="tech-mark-btn ${activeClass} ${disabledClass}" 
                 data-tech="${mark.id}" 
+                tabindex="${isDisabled ? '-1' : '0'}"
                 ${isDisabled ? 'aria-disabled="true"' : ''}
                 title="${titleText}">
           <div class="tech-icon-wrap">
@@ -460,8 +488,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 클릭 이벤트 바인딩
     techLogoGrid.querySelectorAll('.tech-mark-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        // 비활성화된 기술은 클릭 방지
-        if (btn.classList.contains('is-disabled')) return;
+        // 비활성화된 기술은 친절한 안내 토스트 피드백 제공 후 클릭 방지
+        if (btn.classList.contains('is-disabled')) {
+          showToast(`현재 [${currentCatName}] 카테고리에는 해당 기술 프로젝트가 없습니다.`);
+          return;
+        }
 
         const techId = btn.getAttribute('data-tech');
         if (activeTechMark === techId) {
@@ -496,19 +527,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     return `
-      <div class="repo-card ${isDel ? 'is-deleted' : ''}" data-id="${repo.id}">
+      <div class="repo-card ${isDel ? 'is-deleted' : ''}" data-id="${escapeHtml(repo.id)}">
         <div class="repo-card-top">
-          <span class="repo-category-pill">${repo.categoryName}</span>
+          <span class="repo-category-pill">${escapeHtml(repo.categoryName)}</span>
           ${badgeHTML}
         </div>
 
         <div class="repo-card-body">
-          <h4 class="repo-card-title">${repo.title}</h4>
-          <p class="repo-card-subtitle">${repo.subtitle}</p>
-          <p class="repo-card-desc">${repo.description}</p>
+          <h4 class="repo-card-title">${escapeHtml(repo.title)}</h4>
+          <p class="repo-card-subtitle">${escapeHtml(repo.subtitle)}</p>
+          <p class="repo-card-desc">${escapeHtml(repo.description)}</p>
           
           <div class="repo-card-tags">
-            ${(repo.tags || []).slice(0, 4).map(t => `<span class="tag-pill">${t}</span>`).join('')}
+            ${(repo.tags || []).slice(0, 4).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('')}
           </div>
         </div>
 
@@ -516,20 +547,20 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div class="repo-footer-left">
             <div class="lang-indicator">
               <span class="lang-dot" style="background-color: ${repo.languageColor};"></span>
-              <span>${repo.language}</span>
+              <span>${escapeHtml(repo.language)}</span>
             </div>
-            <span class="relative-time">${relativeTime}</span>
+            <span class="relative-time">${escapeHtml(relativeTime)}</span>
             ${stars > 0 ? `<span style="display: inline-flex; align-items: center; gap: 0.2rem; font-size: 0.75rem; color: var(--accent-amber);">${ICONS.star} ${stars}</span>` : ''}
           </div>
           
           <div class="repo-actions">
-            <button class="btn-card-action primary" onclick="openProjectModal('${repo.id}')">
+            <button class="btn-card-action primary" onclick="openProjectModal('${escapeHtml(repo.id)}')">
               ${ICONS.info} <span>상세</span>
             </button>
-            <a href="${repo.githubUrl}" target="_blank" rel="noopener noreferrer" class="btn-card-action" title="GitHub">
+            <a href="${encodeURI(repo.githubUrl)}" target="_blank" rel="noopener noreferrer" class="btn-card-action" title="GitHub">
               ${ICONS.external}
             </a>
-            <button class="btn-card-action" onclick="copyCloneCommand('${repo.name}')" title="Clone">
+            <button class="btn-card-action" onclick="copyCloneCommand('${escapeHtml(repo.name)}')" title="Clone">
               ${ICONS.copy}
             </button>
           </div>
@@ -595,6 +626,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       resultsCountEl.innerText = `총 ${allRepositories.length}개 리포지토리 중 ${filtered.length}개 표시${markLabel}`;
     }
 
+    // Sync Filter State to URL
+    syncUrlFilters();
+
     // Render Grid
     renderGrid(filtered);
   }
@@ -609,13 +643,57 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (repos.length === 0) {
+      const hasActiveFilters = (currentCategory !== 'all' || !!activeTechMark);
+      let filterNoticeHTML = '';
+
+      if (hasActiveFilters) {
+        const activeLabels = [];
+        if (currentCategory !== 'all') {
+          const catLabels = {
+            ai: 'AI & Vision',
+            game: '게임 & 그래픽스',
+            engine: '커스텀 엔진 & 웹',
+            algorithm: '알고리즘 & CS',
+            education: '교육 & 도구'
+          };
+          activeLabels.push(`[${catLabels[currentCategory] || currentCategory}] 카테고리`);
+        }
+        if (activeTechMark) {
+          const found = TECH_MARKS.find(m => m.id === activeTechMark);
+          if (found) activeLabels.push(`[${found.name}] 기술 마크`);
+        }
+
+        filterNoticeHTML = `
+          <div style="margin-top: 1.25rem; padding: 1.25rem; border-radius: var(--radius-md); background: var(--bg-tertiary); border: 1px solid var(--border-color); display: inline-flex; flex-direction: column; align-items: center; max-width: 480px;">
+            <p style="color: var(--accent-cyan); font-size: 0.9rem; margin-bottom: 0.9rem; line-height: 1.5;">
+              현재 <strong>${activeLabels.join(' 및 ')}</strong> 필터가 적용되어 있어 검색 결과가 제한되었을 수 있습니다.
+            </p>
+            <button id="inline-clear-filters-btn" class="btn-primary" style="padding: 0.55rem 1.2rem; font-size: 0.85rem; cursor: pointer;">
+              <span>필터 해제하고 전체에서 계속 검색</span>
+            </button>
+          </div>
+        `;
+      }
+
       repoGridContainer.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
-          <div style="font-size: 2.5rem; margin-bottom: 0.8rem;">🔍</div>
-          <h3>선택한 기술 로고 또는 검색 조건에 일치하는 저장소가 없습니다.</h3>
-          <p>선택된 기술 마크를 다시 클릭하여 해제하거나 검색어를 변경해보세요.</p>
+          <div style="font-size: 2.8rem; margin-bottom: 0.8rem;">🔍</div>
+          <h3 style="color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.25rem;">일치하는 저장소가 없습니다</h3>
+          <p style="font-size: 0.9rem;">검색어를 확인하거나 적용된 필터 조건을 변경해 보세요.</p>
+          ${filterNoticeHTML}
         </div>
       `;
+
+      const inlineBtn = document.getElementById('inline-clear-filters-btn');
+      if (inlineBtn) {
+        inlineBtn.addEventListener('click', () => {
+          currentCategory = 'all';
+          activeTechMark = null;
+          renderCategoryTabs();
+          renderTechLogoGrid();
+          applyFiltersAndRender();
+        });
+      }
       return;
     }
 
@@ -682,7 +760,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       modalHighlights.innerHTML = items.map(h => `
         <li class="highlight-item">
           <span class="highlight-bullet">✓</span>
-          <span>${h}</span>
+          <span>${escapeHtml(h)}</span>
         </li>
       `).join('');
     }
@@ -699,7 +777,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (modalTech) {
       const techList = (repo.details && repo.details.techStack) ? repo.details.techStack : repo.tags;
-      modalTech.innerHTML = (techList || []).map(t => `<span class="tag-pill" style="font-size: 0.82rem; padding: 0.25rem 0.75rem;">${t}</span>`).join('');
+      modalTech.innerHTML = (techList || []).map(t => `<span class="tag-pill" style="font-size: 0.82rem; padding: 0.25rem 0.75rem;">${escapeHtml(t)}</span>`).join('');
     }
 
     if (modalCloneCmd) {
@@ -719,9 +797,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!modalOverlay) return;
     modalOverlay.classList.remove('active');
     document.body.style.overflow = '';
-    if (window.location.hash.startsWith('#repo/')) {
-      history.replaceState(null, '', '#explorer');
-    }
+    syncUrlFilters();
   };
 
   window.copyModalClone = function() {
@@ -729,6 +805,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       copyCloneCommand(window._currentModalRepo);
     }
   };
+
+  // -----------------------------------------------------------------
+  // URL Deep Linking (Filter state in URL query & hash)
+  // -----------------------------------------------------------------
+  function readUrlFilters() {
+    let params = new URLSearchParams(window.location.search);
+    if (!params.has('cat') && !params.has('tech') && window.location.hash.includes('?')) {
+      const qIndex = window.location.hash.indexOf('?');
+      params = new URLSearchParams(window.location.hash.substring(qIndex + 1));
+    }
+    const cat = params.get('cat') || params.get('category');
+    const tech = params.get('tech');
+
+    if (cat && ['all', 'ai', 'game', 'engine', 'algorithm', 'education'].includes(cat)) {
+      currentCategory = cat;
+    }
+    if (tech && TECH_MARKS.some(m => m.id === tech)) {
+      activeTechMark = tech;
+    }
+  }
+
+  function syncUrlFilters() {
+    if (window.location.hash && window.location.hash.startsWith('#repo/')) return;
+
+    const params = new URLSearchParams();
+    if (currentCategory !== 'all') params.set('cat', currentCategory);
+    if (activeTechMark) params.set('tech', activeTechMark);
+
+    const qs = params.toString();
+    const targetHash = qs ? `#explorer?${qs}` : '#explorer';
+    if (window.location.hash !== targetHash) {
+      history.replaceState(null, '', targetHash);
+    }
+  }
 
   function checkHashDeepLink() {
     const hash = window.location.hash;

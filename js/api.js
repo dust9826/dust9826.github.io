@@ -15,6 +15,7 @@ class LiveGitHubSync {
       source: 'initial', // 'api' | 'cache' | 'offline_fallback'
       lastSync: null,
       rateLimitRemaining: null,
+      isRateLimited: false,
       newReposCount: 0,
       deletedReposCount: 0,
       totalCount: 0
@@ -181,6 +182,7 @@ class LiveGitHubSync {
         if (response.ok) {
           apiRepos = await response.json();
           this.state.isLive = true;
+          this.state.isRateLimited = false;
           this.state.source = 'api';
           this.state.lastSync = new Date();
           localStorage.setItem(this.cacheKey, JSON.stringify({
@@ -189,6 +191,9 @@ class LiveGitHubSync {
           }));
         } else {
           console.warn(`[LiveGitHubSync] API responded with ${response.status}. Using fallback.`);
+          if (response.status === 403 || (rateLimitRem !== null && Number(rateLimitRem) === 0)) {
+            this.state.isRateLimited = true;
+          }
           this.state.source = 'offline_fallback';
         }
       } catch (err) {
