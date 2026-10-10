@@ -1,69 +1,111 @@
 /**
- * dust9826 GitHub Showcase - Interactive Application Logic
+ * dust9826 GitHub Showcase - Interactive Application Engine
  * Author: Jeonghyeon Kim (@dust9826)
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-  // State
+document.addEventListener('DOMContentLoaded', async () => {
+  // Application State
   let currentCategory = 'all';
   let currentSearchQuery = '';
   let activeTag = null;
   let currentSort = 'featured';
+  let currentViewMode = 'grid'; // 'grid' | 'list'
+  
+  let allRepositories = [];
+  let newRepositories = [];
+  let deletedRepositories = [];
 
   // DOM Elements
+  const heroAvatar = document.getElementById('nav-avatar');
+  const statTotalRepos = document.getElementById('stat-total-repos');
+  const syncStatusText = document.getElementById('sync-status-text');
+  const syncDot = document.getElementById('sync-dot');
+  const syncDiffSummary = document.getElementById('sync-diff-summary');
+  const manualSyncBtn = document.getElementById('manual-sync-btn');
+  
+  const newSection = document.getElementById('new-section');
+  const newReposGrid = document.getElementById('new-repos-grid');
+  
   const featuredContainer = document.getElementById('featured-grid');
   const repoGridContainer = document.getElementById('repo-grid');
   const categoryTabsContainer = document.getElementById('category-tabs');
   const tagCloudContainer = document.getElementById('tag-cloud');
   const searchInput = document.getElementById('search-input');
   const sortSelect = document.getElementById('sort-select');
+  const viewGridBtn = document.getElementById('view-grid-btn');
+  const viewListBtn = document.getElementById('view-list-btn');
   const resultsCountEl = document.getElementById('results-count');
   const resetFilterBtn = document.getElementById('reset-filter-btn');
+  
   const themeToggleBtn = document.getElementById('theme-toggle');
   const backToTopBtn = document.getElementById('back-to-top');
+  const toastEl = document.getElementById('toast');
+  
+  // Mobile Drawer
+  const mobileHamburger = document.getElementById('mobile-hamburger');
+  const mobileDrawerOverlay = document.getElementById('mobile-drawer-overlay');
+  const closeDrawerBtn = document.getElementById('close-drawer-btn');
+  
+  // Modal Elements
   const modalOverlay = document.getElementById('project-modal');
   const modalCloseBtn = document.getElementById('modal-close-btn');
-  const toastEl = document.getElementById('toast');
+  
+  // Terminal Modal
+  const terminalModal = document.getElementById('terminal-modal');
+  const terminalInput = document.getElementById('terminal-input');
+  const terminalBody = document.getElementById('terminal-body');
+  const openTerminalBtn = document.getElementById('open-terminal-btn');
 
-  // SVG Icon Templates
+  // SVG Icons
   const ICONS = {
-    sparkles: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`,
-    cpu: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>`,
-    gamepad: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="6"/></svg>`,
-    cube: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.12 6.4-6.05-4.06a2 2 0 0 0-2.17-.05L2.9 6.32A2 2 0 0 0 2 8.04v7.92a2 2 0 0 0 .96 1.73l9.96 5.91a2 2 0 0 0 2.05.02l6.15-4.13a2 2 0 0 0 .88-1.68V8.04a2 2 0 0 0-.88-1.64Z"/><path d="M12 22V12"/><path d="m2.6 7.6 9.4 5.4 9.4-5.4"/></svg>`,
-    terminal: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>`,
-    book: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 2v20"/></svg>`,
-    github: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>`,
-    external: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>`,
-    copy: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`,
-    info: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
-    check: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+    sparkles: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`,
+    github: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>`,
+    external: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>`,
+    copy: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`,
+    info: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
+    check: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+    star: `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
   };
 
   // -----------------------------------------------------------------
   // Theme Management
   // -----------------------------------------------------------------
   function initTheme() {
-    const savedTheme = localStorage.getItem('dust_portfolio_theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeIcon(savedTheme);
+    const saved = localStorage.getItem('dust_theme_pref') ||
+      (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    document.documentElement.setAttribute('data-theme', saved);
+    updateThemeIcon(saved);
   }
 
   function toggleTheme() {
     const current = document.documentElement.getAttribute('data-theme') || 'dark';
     const next = current === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('dust_portfolio_theme', next);
+    localStorage.setItem('dust_theme_pref', next);
     updateThemeIcon(next);
   }
 
   function updateThemeIcon(theme) {
-    if (themeToggleBtn) {
-      themeToggleBtn.innerHTML = theme === 'dark'
-        ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y1="12"/><line x1="21" y1="12" x2="23" y1="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
-        : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
-    }
+    if (!themeToggleBtn) return;
+    themeToggleBtn.innerHTML = theme === 'dark'
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y1="12"/><line x1="21" y1="12" x2="23" y1="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
+      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
   }
+
+  // -----------------------------------------------------------------
+  // Mobile Drawer Navigation
+  // -----------------------------------------------------------------
+  function openMobileDrawer() {
+    if (mobileDrawerOverlay) mobileDrawerOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMobileDrawer() {
+    if (mobileDrawerOverlay) mobileDrawerOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  window.closeMobileDrawer = closeMobileDrawer;
 
   // -----------------------------------------------------------------
   // Toast Helper
@@ -72,9 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!toastEl) return;
     toastEl.innerHTML = `${ICONS.check} <span>${message}</span>`;
     toastEl.classList.add('show');
-    setTimeout(() => {
-      toastEl.classList.remove('show');
-    }, 2800);
+    setTimeout(() => toastEl.classList.remove('show'), 2600);
   }
 
   // -----------------------------------------------------------------
@@ -84,19 +124,91 @@ document.addEventListener('DOMContentLoaded', () => {
     const cmd = `git clone https://github.com/dust9826/${repoName}.git`;
     navigator.clipboard.writeText(cmd).then(() => {
       showToast(`클론 명령어가 복사되었습니다: ${repoName}`);
-    }).catch(err => {
-      console.error('Copy failed', err);
-    });
+    }).catch(err => console.error('Copy error', err));
+  }
+
+  window.copyCloneCommand = copyCloneCommand;
+
+  // -----------------------------------------------------------------
+  // Live GitHub Sync & Reconciliation
+  // -----------------------------------------------------------------
+  async function performLiveSync(force = false) {
+    if (syncStatusText) syncStatusText.innerText = 'GitHub 최신 정보 동기화 중...';
+    if (syncDot) syncDot.style.background = 'var(--accent-amber)';
+
+    try {
+      const syncResult = await window.liveGitHubSync.reconcileRepositories(force);
+      allRepositories = syncResult.allRepos;
+      newRepositories = syncResult.newRepos;
+      deletedRepositories = syncResult.deletedRepos;
+
+      // Update sync banner
+      if (syncDot) syncDot.style.background = 'var(--accent-emerald)';
+      if (syncStatusText) {
+        syncStatusText.innerText = syncResult.state.source === 'api'
+          ? 'GitHub 실시간 연동됨 (최신)'
+          : 'GitHub 캐시 연동 모드';
+      }
+
+      // Summary diff info
+      if (syncDiffSummary) {
+        const parts = [];
+        if (newRepositories.length > 0) parts.push(`✨ 신규 ${newRepositories.length}개 감지`);
+        if (deletedRepositories.length > 0) parts.push(`⚠️ ${deletedRepositories.length}개 보관/비공개`);
+        if (parts.length === 0) parts.push(`전체 ${allRepositories.length}개 최신 동기화 완료`);
+        syncDiffSummary.innerText = parts.join(' | ');
+      }
+
+      if (statTotalRepos) {
+        statTotalRepos.innerText = allRepositories.length.toString();
+      }
+
+      // Render NEW block if any new repos exist
+      renderNewSection();
+
+      // Render Repositories
+      renderCategoryTabs();
+      renderTagCloud();
+      applyFiltersAndRender();
+      
+      // Check URL Hash for direct deep linking (#repo/id)
+      checkHashDeepLink();
+
+    } catch (err) {
+      console.error('[App] Live sync failed:', err);
+      if (syncStatusText) syncStatusText.innerText = '오프라인 기준 데이터 모드';
+      if (syncDot) syncDot.style.background = 'var(--accent-rose)';
+      allRepositories = (typeof REPOSITORIES_DATA !== 'undefined') ? REPOSITORIES_DATA : [];
+      renderCategoryTabs();
+      renderTagCloud();
+      applyFiltersAndRender();
+    }
   }
 
   // -----------------------------------------------------------------
-  // Render Featured Projects (Flagship 4)
+  // Render NEW Detected Repositories Section
+  // -----------------------------------------------------------------
+  function renderNewSection() {
+    if (!newSection || !newReposGrid) return;
+
+    if (newRepositories.length > 0) {
+      newSection.classList.add('has-new');
+      newReposGrid.innerHTML = newRepositories.map(repo => createRepoCardHTML(repo)).join('');
+    } else {
+      newSection.classList.remove('has-new');
+      newReposGrid.innerHTML = '';
+    }
+  }
+
+  // -----------------------------------------------------------------
+  // Render Featured Flagship Projects
   // -----------------------------------------------------------------
   function renderFeatured() {
     if (!featuredContainer) return;
-    const featuredProjects = REPOSITORIES_DATA.filter(r => r.featured).slice(0, 4);
+    const baseList = (typeof REPOSITORIES_DATA !== 'undefined') ? REPOSITORIES_DATA : allRepositories;
+    const flagshipList = baseList.filter(r => r.featured).slice(0, 4);
 
-    featuredContainer.innerHTML = featuredProjects.map(proj => {
+    featuredContainer.innerHTML = flagshipList.map(proj => {
       const bannerBg = proj.coverImage
         ? `background-image: url('${proj.coverImage}');`
         : `background: ${proj.gradient};`;
@@ -146,31 +258,31 @@ document.addEventListener('DOMContentLoaded', () => {
   // -----------------------------------------------------------------
   function renderCategoryTabs() {
     if (!categoryTabsContainer) return;
-    const totalCount = REPOSITORIES_DATA.length;
-
-    const tabsHtml = [
-      `<button class="tab-btn ${currentCategory === 'all' ? 'active' : ''}" data-cat="all">
-        <span>🌟 전체</span>
-        <span class="tab-count">${totalCount}</span>
-      </button>`
-    ];
-
-    SHOWCASE_STATS.domains.forEach(d => {
-      const isSelected = currentCategory === d.id;
-      tabsHtml.push(`
-        <button class="tab-btn ${isSelected ? 'active' : ''}" data-cat="${d.id}">
-          <span>${d.label}</span>
-          <span class="tab-count">${d.count}</span>
-        </button>
-      `);
+    const counts = { all: allRepositories.length };
+    allRepositories.forEach(r => {
+      counts[r.category] = (counts[r.category] || 0) + 1;
     });
 
-    categoryTabsContainer.innerHTML = tabsHtml.join('');
+    const domains = [
+      { id: 'all', label: '🌟 전체', count: counts.all },
+      { id: 'ai', label: '🤖 AI & Vision', count: counts.ai || 0 },
+      { id: 'game', label: '🎮 게임 & 그래픽스', count: counts.game || 0 },
+      { id: 'engine', label: '💻 커스텀 엔진 & 웹', count: counts.engine || 0 },
+      { id: 'algorithm', label: '⚡ 알고리즘 & CS', count: counts.algorithm || 0 },
+      { id: 'education', label: '📚 교육 & 도구', count: counts.education || 0 }
+    ];
+
+    categoryTabsContainer.innerHTML = domains.map(d => `
+      <button class="tab-btn ${currentCategory === d.id ? 'active' : ''}" data-cat="${d.id}">
+        <span>${d.label}</span>
+        <span class="tab-count">${d.count}</span>
+      </button>
+    `).join('');
 
     categoryTabsContainer.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         currentCategory = btn.getAttribute('data-cat');
-        activeTag = null; // reset tag filter on tab switch
+        activeTag = null;
         renderCategoryTabs();
         applyFiltersAndRender();
       });
@@ -178,24 +290,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // -----------------------------------------------------------------
-  // Render Tag Cloud Filter
+  // Render Tag Cloud
   // -----------------------------------------------------------------
   function renderTagCloud() {
     if (!tagCloudContainer) return;
-    // Extract unique high-frequency tags
-    const allTags = {};
-    REPOSITORIES_DATA.forEach(r => {
-      r.tags.forEach(t => {
-        allTags[t] = (allTags[t] || 0) + 1;
+    const tagFreq = {};
+    allRepositories.forEach(r => {
+      (r.tags || []).forEach(t => {
+        tagFreq[t] = (tagFreq[t] || 0) + 1;
       });
     });
 
-    const popularTags = Object.entries(allTags)
+    const popular = Object.entries(tagFreq)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 14)
       .map(([name]) => name);
 
-    tagCloudContainer.innerHTML = popularTags.map(tag => `
+    tagCloudContainer.innerHTML = popular.map(tag => `
       <button class="tag-filter-btn ${activeTag === tag ? 'active' : ''}" data-tag="${tag}">
         #${tag}
       </button>
@@ -212,65 +323,137 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // -----------------------------------------------------------------
-  // Filtering & Sorting Logic
+  // Create HTML Card for a Repository
+  // -----------------------------------------------------------------
+  function createRepoCardHTML(repo) {
+    const isNew = repo.isNew;
+    const isDel = repo.isDeleted;
+    const stars = repo.stats ? repo.stats.stars : 0;
+    const relativeTime = repo.stats ? (repo.stats.relativePushed || '최근') : '최근';
+
+    let badgeHTML = '';
+    if (isNew) {
+      badgeHTML = `<span class="badge-new">✨ NEW</span>`;
+    } else if (isDel) {
+      badgeHTML = `<span class="badge-deleted">⚠️ 삭제/비공개됨</span>`;
+    } else if (repo.featured) {
+      badgeHTML = `<span style="font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 9999px; background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3);">⭐ Flagship</span>`;
+    } else {
+      badgeHTML = `<span style="font-size: 0.72rem; color: var(--text-muted);">${repo.period}</span>`;
+    }
+
+    return `
+      <div class="repo-card ${isDel ? 'is-deleted' : ''}" data-id="${repo.id}">
+        <div class="repo-card-top">
+          <span class="repo-category-pill">${repo.categoryName}</span>
+          ${badgeHTML}
+        </div>
+
+        <div class="repo-card-body">
+          <h4 class="repo-card-title">${repo.title}</h4>
+          <p class="repo-card-subtitle">${repo.subtitle}</p>
+          <p class="repo-card-desc">${repo.description}</p>
+          
+          <div class="repo-card-tags">
+            ${(repo.tags || []).slice(0, 4).map(t => `<span class="tag-pill">${t}</span>`).join('')}
+          </div>
+        </div>
+
+        <div class="repo-card-footer">
+          <div class="repo-footer-left">
+            <div class="lang-indicator">
+              <span class="lang-dot" style="background-color: ${repo.languageColor};"></span>
+              <span>${repo.language}</span>
+            </div>
+            <span class="relative-time">${relativeTime}</span>
+            ${stars > 0 ? `<span style="display: inline-flex; align-items: center; gap: 0.2rem; font-size: 0.75rem; color: var(--accent-amber);">${ICONS.star} ${stars}</span>` : ''}
+          </div>
+          
+          <div class="repo-actions">
+            <button class="btn-card-action primary" onclick="openProjectModal('${repo.id}')">
+              ${ICONS.info} <span>상세</span>
+            </button>
+            <a href="${repo.githubUrl}" target="_blank" rel="noopener noreferrer" class="btn-card-action" title="GitHub">
+              ${ICONS.external}
+            </a>
+            <button class="btn-card-action" onclick="copyCloneCommand('${repo.name}')" title="Clone">
+              ${ICONS.copy}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // -----------------------------------------------------------------
+  // Filter & Render Logic
   // -----------------------------------------------------------------
   function applyFiltersAndRender() {
-    let filtered = [...REPOSITORIES_DATA];
+    let filtered = [...allRepositories];
 
-    // 1. Category
+    // Category
     if (currentCategory !== 'all') {
       filtered = filtered.filter(r => r.category === currentCategory);
     }
 
-    // 2. Tag
+    // Active Tag
     if (activeTag) {
-      filtered = filtered.filter(r => r.tags.includes(activeTag));
+      filtered = filtered.filter(r => (r.tags || []).includes(activeTag));
     }
 
-    // 3. Search Query
+    // Search Query
     if (currentSearchQuery.trim()) {
       const q = currentSearchQuery.toLowerCase().trim();
       filtered = filtered.filter(r => {
         return (
           r.name.toLowerCase().includes(q) ||
           r.title.toLowerCase().includes(q) ||
-          r.subtitle.toLowerCase().includes(q) ||
+          (r.subtitle && r.subtitle.toLowerCase().includes(q)) ||
           r.description.toLowerCase().includes(q) ||
-          r.tags.some(t => t.toLowerCase().includes(q)) ||
-          (r.details && r.details.overview.toLowerCase().includes(q)) ||
-          r.language.toLowerCase().includes(q)
+          (r.tags && r.tags.some(t => t.toLowerCase().includes(q))) ||
+          (r.language && r.language.toLowerCase().includes(q))
         );
       });
     }
 
-    // 4. Sort
+    // Sort
     if (currentSort === 'featured') {
-      filtered.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+      filtered.sort((a, b) => {
+        if (a.isNew !== b.isNew) return b.isNew ? 1 : -1;
+        return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+      });
     } else if (currentSort === 'latest') {
-      filtered.sort((a, b) => b.period.localeCompare(a.period));
+      filtered.sort((a, b) => {
+        const dateA = (a.stats && a.stats.pushedAt) ? new Date(a.stats.pushedAt).getTime() : 0;
+        const dateB = (b.stats && b.stats.pushedAt) ? new Date(b.stats.pushedAt).getTime() : 0;
+        return dateB - dateA;
+      });
     } else if (currentSort === 'name') {
       filtered.sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    // Update Counter
+    // Results count
     if (resultsCountEl) {
-      resultsCountEl.innerText = `총 ${REPOSITORIES_DATA.length}개 리포지토리 중 ${filtered.length}개 표시`;
+      resultsCountEl.innerText = `총 ${allRepositories.length}개 리포지토리 중 ${filtered.length}개 표시`;
     }
 
     // Render Grid
-    renderRepoGrid(filtered);
+    renderGrid(filtered);
   }
 
-  // -----------------------------------------------------------------
-  // Render Repositories Grid
-  // -----------------------------------------------------------------
-  function renderRepoGrid(repos) {
+  function renderGrid(repos) {
     if (!repoGridContainer) return;
+
+    if (currentViewMode === 'list') {
+      repoGridContainer.classList.add('list-view');
+    } else {
+      repoGridContainer.classList.remove('list-view');
+    }
 
     if (repos.length === 0) {
       repoGridContainer.innerHTML = `
-        <div class="empty-state" style="grid-column: 1 / -1;">
-          <div class="empty-state-icon">🔍</div>
+        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+          <div style="font-size: 2.5rem; margin-bottom: 0.8rem;">🔍</div>
           <h3>조건에 맞는 저장소를 찾을 수 없습니다.</h3>
           <p>검색어나 선택된 태그 필터를 변경해보세요.</p>
         </div>
@@ -278,55 +461,18 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    repoGridContainer.innerHTML = repos.map(repo => {
-      const isStarred = repo.featured;
-      return `
-        <div class="repo-card" data-id="${repo.id}">
-          <div class="repo-card-top">
-            <span class="repo-category-pill">${repo.categoryName}</span>
-            <span class="repo-badge-tag ${isStarred ? 'starred' : ''}">
-              ${repo.badge || repo.period}
-            </span>
-          </div>
-
-          <div class="repo-card-body">
-            <h4 class="repo-card-title">${repo.title}</h4>
-            <p class="repo-card-subtitle">${repo.subtitle}</p>
-            <p class="repo-card-desc">${repo.description}</p>
-            
-            <div class="repo-card-tags">
-              ${repo.tags.slice(0, 4).map(t => `<span class="tag-pill">${t}</span>`).join('')}
-            </div>
-          </div>
-
-          <div class="repo-card-footer">
-            <div class="lang-indicator">
-              <span class="lang-dot" style="background-color: ${repo.languageColor};"></span>
-              <span>${repo.language}</span>
-            </div>
-            <div class="repo-actions">
-              <button class="btn-card-action primary" onclick="openProjectModal('${repo.id}')">
-                ${ICONS.info} <span>상세</span>
-              </button>
-              <a href="${repo.githubUrl}" target="_blank" rel="noopener noreferrer" class="btn-card-action" title="GitHub">
-                ${ICONS.external}
-              </a>
-              <button class="btn-card-action" onclick="copyCloneCommand('${repo.name}')" title="Clone">
-                ${ICONS.copy}
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
+    repoGridContainer.innerHTML = repos.map(r => createRepoCardHTML(r)).join('');
   }
 
   // -----------------------------------------------------------------
-  // Project Detail Modal
+  // Project Detail Modal & Hash Deep Linking
   // -----------------------------------------------------------------
   window.openProjectModal = function(id) {
-    const repo = REPOSITORIES_DATA.find(r => r.id === id);
+    const repo = allRepositories.find(r => r.id === id || r.name === id);
     if (!repo || !modalOverlay) return;
+
+    // Update URL Hash without reload
+    history.replaceState(null, '', `#repo/${repo.name}`);
 
     const modalBanner = document.getElementById('modal-banner');
     const modalTitle = document.getElementById('modal-title');
@@ -334,6 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalPeriod = document.getElementById('modal-period');
     const modalTeam = document.getElementById('modal-team');
     const modalCategory = document.getElementById('modal-category');
+    const modalDiffBadge = document.getElementById('modal-diff-badge');
     const modalOverview = document.getElementById('modal-overview');
     const modalHighlights = document.getElementById('modal-highlights');
     const modalChallenges = document.getElementById('modal-challenges');
@@ -341,14 +488,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalCloneCmd = document.getElementById('modal-clone-cmd');
     const modalGithubLink = document.getElementById('modal-github-link');
 
-    // Banner setup
     if (modalBanner) {
       if (repo.coverImage) {
         modalBanner.style.backgroundImage = `url('${repo.coverImage}')`;
         modalBanner.style.background = '';
       } else {
         modalBanner.style.backgroundImage = 'none';
-        modalBanner.style.background = repo.gradient;
+        modalBanner.style.background = repo.gradient || 'linear-gradient(135deg, #1e293b 0%, #475569 100%)';
       }
     }
 
@@ -357,33 +503,51 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modalPeriod) modalPeriod.innerText = repo.period;
     if (modalTeam) modalTeam.innerText = repo.team;
     if (modalCategory) modalCategory.innerText = repo.categoryName;
-    if (modalOverview) modalOverview.innerText = repo.details ? repo.details.overview : repo.description;
 
-    if (modalHighlights && repo.details && repo.details.highlights) {
-      modalHighlights.innerHTML = repo.details.highlights.map(h => `
+    if (modalDiffBadge) {
+      if (repo.isNew) {
+        modalDiffBadge.innerHTML = `<span class="badge-new">✨ 실시간 신규 감지</span>`;
+      } else if (repo.isDeleted) {
+        modalDiffBadge.innerHTML = `<span class="badge-deleted">⚠️ 저장소 삭제/비공개됨</span>`;
+      } else {
+        modalDiffBadge.innerHTML = '';
+      }
+    }
+
+    if (modalOverview) {
+      modalOverview.innerText = (repo.details && repo.details.overview)
+        ? repo.details.overview
+        : repo.description;
+    }
+
+    if (modalHighlights) {
+      const items = (repo.details && repo.details.highlights) ? repo.details.highlights : [];
+      modalHighlights.innerHTML = items.map(h => `
         <li class="highlight-item">
           <span class="highlight-bullet">✓</span>
           <span>${h}</span>
         </li>
       `).join('');
-    } else if (modalHighlights) {
-      modalHighlights.innerHTML = '';
     }
 
-    if (modalChallenges && repo.details && repo.details.challenges) {
-      modalChallenges.innerText = repo.details.challenges;
-      document.getElementById('modal-challenges-container').style.display = 'block';
-    } else if (modalChallenges) {
-      document.getElementById('modal-challenges-container').style.display = 'none';
+    const challengesCont = document.getElementById('modal-challenges-container');
+    if (modalChallenges && challengesCont) {
+      if (repo.details && repo.details.challenges) {
+        modalChallenges.innerText = repo.details.challenges;
+        challengesCont.style.display = 'block';
+      } else {
+        challengesCont.style.display = 'none';
+      }
     }
 
     if (modalTech) {
       const techList = (repo.details && repo.details.techStack) ? repo.details.techStack : repo.tags;
-      modalTech.innerHTML = techList.map(t => `<span class="tag-pill" style="font-size: 0.85rem; padding: 0.3rem 0.8rem;">${t}</span>`).join('');
+      modalTech.innerHTML = (techList || []).map(t => `<span class="tag-pill" style="font-size: 0.82rem; padding: 0.25rem 0.75rem;">${t}</span>`).join('');
     }
 
-    const cloneCommand = `git clone https://github.com/dust9826/${repo.name}.git`;
-    if (modalCloneCmd) modalCloneCmd.innerText = cloneCommand;
+    if (modalCloneCmd) {
+      modalCloneCmd.innerText = `git clone https://github.com/dust9826/${repo.name}.git`;
+    }
 
     if (modalGithubLink) {
       modalGithubLink.href = repo.githubUrl;
@@ -398,6 +562,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!modalOverlay) return;
     modalOverlay.classList.remove('active');
     document.body.style.overflow = '';
+    // Restore base hash if it was a repo deep link
+    if (window.location.hash.startsWith('#repo/')) {
+      history.replaceState(null, '', '#explorer');
+    }
   };
 
   window.copyModalClone = function() {
@@ -406,8 +574,132 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Expose global helpers
-  window.copyCloneCommand = copyCloneCommand;
+  function checkHashDeepLink() {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#repo/')) {
+      const repoName = decodeURIComponent(hash.replace('#repo/', ''));
+      window.openProjectModal(repoName);
+    }
+  }
+
+  // -----------------------------------------------------------------
+  // Interactive CLI Terminal Mode
+  // -----------------------------------------------------------------
+  window.openTerminal = function() {
+    if (!terminalModal) return;
+    terminalModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    if (terminalInput) {
+      setTimeout(() => terminalInput.focus(), 150);
+    }
+  };
+
+  window.closeTerminal = function() {
+    if (!terminalModal) return;
+    terminalModal.classList.remove('active');
+    document.body.style.overflow = '';
+  };
+
+  function handleTerminalCommand(raw) {
+    const cmd = raw.trim().toLowerCase();
+    const parts = cmd.split(' ');
+    const action = parts[0];
+    const arg = parts.slice(1).join(' ');
+
+    let output = '';
+
+    switch (action) {
+      case 'help':
+        output = `
+Available commands:
+  repos, list       : 모든 리포지토리 목록 및 스타 수 출력
+  info <name>       : 특정 리포지토리 상세 정보 조회
+  clone <name>      : 깃 클론 명령어 클립보드 복사
+  theme             : 다크/라이트 테마 즉시 전환
+  sync              : GitHub 실시간 동기화 강제 실행
+  clear             : 터미널 화면 청소
+  exit              : 터미널 종료
+`;
+        break;
+
+      case 'repos':
+      case 'list':
+        output = allRepositories.map((r, i) => {
+          const tag = r.isNew ? '[NEW]' : (r.isDeleted ? '[DEL]' : '     ');
+          return `${tag} ${String(i + 1).padStart(2, ' ')}. ${r.name.padEnd(32, ' ')} [${r.language}] ★ ${r.stats.stars}`;
+        }).join('\n');
+        break;
+
+      case 'info':
+      case 'cat':
+        if (!arg) {
+          output = '사용법: info <리포지토리명> (예: info GGwaekGGwaek)';
+        } else {
+          const match = allRepositories.find(r => r.name.toLowerCase() === arg.toLowerCase());
+          if (match) {
+            output = `
+Repository: ${match.name}
+Title     : ${match.title}
+Domain    : ${match.categoryName}
+Language  : ${match.language}
+Stars/Fork: ★ ${match.stats.stars} / ⑂ ${match.stats.forks}
+Updated   : ${match.stats.relativePushed}
+URL       : ${match.githubUrl}
+Summary   : ${match.description}
+`;
+          } else {
+            output = `'${arg}' 저장소를 찾을 수 없습니다. 'repos'를 입력하여 목록을 확인하세요.`;
+          }
+        }
+        break;
+
+      case 'clone':
+        if (!arg) {
+          output = '사용법: clone <리포지토리명>';
+        } else {
+          const match = allRepositories.find(r => r.name.toLowerCase() === arg.toLowerCase());
+          if (match) {
+            copyCloneCommand(match.name);
+            output = `Copied to clipboard: git clone ${match.githubUrl}.git`;
+          } else {
+            output = `'${arg}' 저장소를 찾을 수 없습니다.`;
+          }
+        }
+        break;
+
+      case 'theme':
+        toggleTheme();
+        output = `테마가 변경되었습니다: ${document.documentElement.getAttribute('data-theme')}`;
+        break;
+
+      case 'sync':
+        performLiveSync(true);
+        output = 'GitHub 실시간 동기화 파이프라인을 실행했습니다.';
+        break;
+
+      case 'clear':
+        if (terminalBody) {
+          terminalBody.querySelector('.terminal-output').innerHTML = '';
+        }
+        return;
+
+      case 'exit':
+      case 'quit':
+        closeTerminal();
+        return;
+
+      default:
+        if (cmd) {
+          output = `command not found: ${action}. 'help'를 입력하여 명령어 목록을 확인하세요.`;
+        }
+    }
+
+    if (output && terminalBody) {
+      const outputDiv = terminalBody.querySelector('.terminal-output');
+      outputDiv.innerHTML += `\n<span style="color: var(--accent-emerald);">dust9826@showcase:~$</span> ${raw}\n${output}`;
+      terminalBody.scrollTop = terminalBody.scrollHeight;
+    }
+  }
 
   // -----------------------------------------------------------------
   // Event Listeners
@@ -426,6 +718,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  if (viewGridBtn && viewListBtn) {
+    viewGridBtn.addEventListener('click', () => {
+      currentViewMode = 'grid';
+      viewGridBtn.classList.add('active');
+      viewListBtn.classList.remove('active');
+      applyFiltersAndRender();
+    });
+
+    viewListBtn.addEventListener('click', () => {
+      currentViewMode = 'list';
+      viewListBtn.classList.add('active');
+      viewGridBtn.classList.remove('active');
+      applyFiltersAndRender();
+    });
+  }
+
   if (resetFilterBtn) {
     resetFilterBtn.addEventListener('click', () => {
       currentCategory = 'all';
@@ -438,8 +746,43 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  if (manualSyncBtn) {
+    manualSyncBtn.addEventListener('click', () => {
+      showToast('GitHub 최신 정보를 실시간 조회 중입니다...');
+      performLiveSync(true);
+    });
+  }
+
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener('click', toggleTheme);
+  }
+
+  if (mobileHamburger) {
+    mobileHamburger.addEventListener('click', openMobileDrawer);
+  }
+
+  if (closeDrawerBtn) {
+    closeDrawerBtn.addEventListener('click', closeMobileDrawer);
+  }
+
+  if (mobileDrawerOverlay) {
+    mobileDrawerOverlay.addEventListener('click', (e) => {
+      if (e.target === mobileDrawerOverlay) closeMobileDrawer();
+    });
+  }
+
+  if (openTerminalBtn) {
+    openTerminalBtn.addEventListener('click', openTerminal);
+  }
+
+  if (terminalInput) {
+    terminalInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const val = terminalInput.value;
+        terminalInput.value = '';
+        handleTerminalCommand(val);
+      }
+    });
   }
 
   if (modalCloseBtn) {
@@ -448,19 +791,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (modalOverlay) {
     modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) {
-        closeProjectModal();
-      }
+      if (e.target === modalOverlay) closeProjectModal();
     });
   }
 
+  // Global Keybindings (Ctrl+K or ⌘K for Search/Terminal, ESC to close modals)
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modalOverlay && modalOverlay.classList.contains('active')) {
-      closeProjectModal();
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    } else if (e.key === 'Escape') {
+      if (terminalModal && terminalModal.classList.contains('active')) closeTerminal();
+      if (modalOverlay && modalOverlay.classList.contains('active')) closeProjectModal();
+      if (mobileDrawerOverlay && mobileDrawerOverlay.classList.contains('open')) closeMobileDrawer();
     }
   });
 
-  // Back to Top scroll listener
+  // Back to Top Button
   window.addEventListener('scroll', () => {
     if (!backToTopBtn) return;
     if (window.scrollY > 400) {
@@ -476,10 +826,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // -----------------------------------------------------------------
   // Initial Boot
+  // -----------------------------------------------------------------
   initTheme();
   renderFeatured();
-  renderCategoryTabs();
-  renderTagCloud();
-  applyFiltersAndRender();
+  await performLiveSync(false);
 });

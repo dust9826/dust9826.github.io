@@ -2,14 +2,14 @@
 <html lang="ko" data-theme="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Jeonghyeon Kim (dust9826) | Tech Showcase &amp; GitHub Repositories</title>
   
   <!-- SEO & Social Meta -->
-  <meta name="description" content="AI & 컴퓨터 비전 연구, 3D WebGL 엔진, Unity / UE5 멀티플레이어 게임 개발자 김정현(dust9826)의 깃허브 리포지토리 기술별 정리 및 쇼케이스 웹페이지">
+  <meta name="description" content="AI & 컴퓨터 비전 연구, 3D WebGL 엔진, Unity &middot; UE5 멀티플레이어 게임 개발자 김정현(dust9826)의 깃허브 실시간 연동 및 기술별 분류 웹 쇼케이스">
   <meta name="author" content="Jeonghyeon Kim (dust9826)">
   <meta property="og:title" content="Jeonghyeon Kim (dust9826) - Tech Showcase">
-  <meta property="og:description" content="기술의 본질을 깊이 파고드는 시스템 &amp; 그래픽스 엔지니어 김정현의 깃허브 프로젝트 아카이브">
+  <meta property="og:description" content="기술의 본질을 깊이 파고드는 시스템 &amp; 그래픽스 엔지니어 김정현의 깃허브 실시간 리포지토리 아카이브">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://dust9826.github.io/">
   <meta property="og:image" content="https://avatars.githubusercontent.com/u/68475923?v=4">
@@ -29,26 +29,30 @@
 <body>
 
   <!-- ===================================================================
-       Navigation Bar
+       Navigation Bar (Mobile-First)
        =================================================================== -->
   <header class="navbar">
     <div class="container nav-container">
       <a href="#hero" class="brand">
-        <img src="https://avatars.githubusercontent.com/u/68475923?v=4" alt="dust9826 avatar" class="brand-avatar">
+        <img id="nav-avatar" src="https://avatars.githubusercontent.com/u/68475923?v=4" alt="dust9826 avatar" class="brand-avatar">
         <div class="brand-title">
           <span class="brand-name">Jeonghyeon Kim</span>
           <span class="brand-tag">@dust9826</span>
         </div>
       </a>
 
+      <!-- Desktop Nav Menu -->
       <nav>
         <ul class="nav-menu">
-          <li><a href="#featured" class="nav-link">주요 프로젝트</a></li>
-          <li><a href="#explorer" class="nav-link">리포지토리 탐색</a></li>
+          <li><a href="#hero" class="nav-link">소개</a></li>
+          <li><a href="#featured" class="nav-link">플래그십</a></li>
+          <li><a href="#explorer" class="nav-link">리포지토리</a></li>
           <li><a href="#tech-stack" class="nav-link">기술 스택</a></li>
+          <li><button id="open-terminal-btn" class="nav-link" style="color: var(--accent-emerald);">💻 CLI 터미널</button></li>
         </ul>
       </nav>
 
+      <!-- Nav Actions -->
       <div class="nav-actions">
         <button id="theme-toggle" class="icon-btn" aria-label="테마 전환" title="다크 / 라이트 모드 전환">
           <!-- icon injected by JS -->
@@ -59,9 +63,54 @@
           </svg>
           <span>GitHub</span>
         </a>
+        <button id="mobile-hamburger" class="btn-hamburger" aria-label="모바일 메뉴 열기">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- Mobile Slide-in Drawer -->
+  <div id="mobile-drawer-overlay" class="mobile-drawer-overlay">
+    <div class="mobile-drawer">
+      <div class="drawer-header">
+        <div class="brand">
+          <img src="https://avatars.githubusercontent.com/u/68475923?v=4" alt="dust9826" class="brand-avatar">
+          <span class="brand-name">김정현</span>
+        </div>
+        <button id="close-drawer-btn" class="icon-btn" aria-label="메뉴 닫기">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <ul class="drawer-links">
+        <li><a href="#hero" class="drawer-link" onclick="closeMobileDrawer()">🏠 전체 소개</a></li>
+        <li><a href="#featured" class="drawer-link" onclick="closeMobileDrawer()">⭐ 주요 플래그십</a></li>
+        <li><a href="#explorer" class="drawer-link" onclick="closeMobileDrawer()">📂 리포지토리 탐색</a></li>
+        <li><a href="#tech-stack" class="drawer-link" onclick="closeMobileDrawer()">🛠️ 기술 스택 매트릭스</a></li>
+        <li><button class="drawer-link" style="width: 100%; text-align: left; color: var(--accent-emerald);" onclick="closeMobileDrawer(); openTerminal();">💻 CLI 터미널 실행</button></li>
+        <li><a href="https://github.com/dust9826" target="_blank" rel="noopener noreferrer" class="drawer-link">↗ GitHub 공식 프로필</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       Live Sync Diff Status Bar
+       =================================================================== -->
+  <div class="container">
+    <div class="live-sync-banner">
+      <div class="sync-status-indicator">
+        <span id="sync-dot" class="status-dot"></span>
+        <span id="sync-status-text">GitHub 실시간 연동 중...</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span id="sync-diff-summary" style="color: var(--text-muted); font-size: 0.78rem;"></span>
+        <button id="manual-sync-btn" class="btn-sync-refresh" title="최신 깃허브 정보 다시 불러오기">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          <span>실시간 최신화</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ===================================================================
        Hero Section
@@ -80,13 +129,13 @@
 
       <p class="hero-subtitle">
         인공지능 &amp; 컴퓨터 비전 연구부터 순수 WebGL 3D 엔진 개발, Unity &middot; UE5 멀티플레이어 및 게임 아키텍처까지 —<br>
-        문제 해결과 시스템 구현에 진심인 오픈소스 리포지토리 모음입니다.
+        실시간으로 동기화되고 자동 분류되는 오픈소스 리포지토리 모음입니다.
       </p>
 
       <!-- Stats Grid -->
       <div class="hero-stats-grid">
         <div class="stat-card">
-          <div class="stat-num">23</div>
+          <div id="stat-total-repos" class="stat-num">23</div>
           <div class="stat-label">오픈소스 리포지토리</div>
         </div>
         <div class="stat-card">
@@ -95,7 +144,7 @@
         </div>
         <div class="stat-card">
           <div class="stat-num">IPIU '26</div>
-          <div class="stat-label">학술 논문 발표 및 게재</div>
+          <div class="stat-label">학술 논문 게재 및 발표</div>
         </div>
         <div class="stat-card">
           <div class="stat-num">8+</div>
@@ -109,20 +158,35 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="6 9 12 15 18 9"/>
           </svg>
-          <span>기술별 리포지토리 둘러보기</span>
+          <span>기술별 리포지토리 탐색</span>
         </a>
-        <a href="https://github.com/dust9826" target="_blank" rel="noopener noreferrer" class="btn-secondary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-          </svg>
-          <span>GitHub 프로필 방문</span>
-        </a>
+        <button onclick="openTerminal()" class="btn-secondary">
+          <span>💻 CLI 터미널 모드</span>
+        </button>
       </div>
     </div>
   </section>
 
   <!-- ===================================================================
-       Featured Projects (Flagship Showcase)
+       NEW Detected Repositories Section (Dynamic)
+       =================================================================== -->
+  <section id="new-section" class="new-section">
+    <div class="container">
+      <div class="new-section-header">
+        <span class="badge-new">✨ NEW</span>
+        <h2 style="font-size: 1.4rem; font-weight: 800;">최근 깃허브에 새로 감지된 저장소</h2>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+        접속 시점 실시간 GitHub API를 통해 기존 데이터베이스에 없던 새로운 리포지토리가 자동으로 감지 및 분류되었습니다.
+      </p>
+      <div id="new-repos-grid" class="repo-grid">
+        <!-- Injected dynamically if new repos exist -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       Featured Projects (Flagship 4선)
        =================================================================== -->
   <section id="featured" class="section">
     <div class="container">
@@ -141,7 +205,7 @@
   </section>
 
   <!-- ===================================================================
-       Repository Explorer (Filter & Grid)
+       Repository Explorer (Filter, Search & Grid)
        =================================================================== -->
   <section id="explorer" class="section">
     <div class="container">
@@ -153,13 +217,11 @@
         </div>
       </div>
 
-      <!-- Explorer Sticky Controls -->
+      <!-- Sticky Controls -->
       <div class="explorer-controls">
-        <div class="filter-row-top">
-          <!-- Category Tabs -->
-          <div id="category-tabs" class="category-tabs">
-            <!-- Tabs rendered by js/app.js -->
-          </div>
+        <!-- Category Tabs -->
+        <div id="category-tabs" class="category-tabs">
+          <!-- Rendered by js/app.js -->
         </div>
 
         <div class="filter-row-bottom">
@@ -172,29 +234,35 @@
             <input type="text" id="search-input" class="search-input" placeholder="리포명, 기술 스택, 키워드 실시간 검색...">
           </div>
 
-          <!-- Controls Right -->
+          <!-- Controls Right (Sort & View Switcher) -->
           <div class="controls-right">
             <select id="sort-select" class="sort-select" aria-label="정렬 옵션">
               <option value="featured">⭐ 추천/중요도순</option>
-              <option value="latest">⏱️ 최신 기간순</option>
+              <option value="latest">⏱️ 최신 푸시순</option>
               <option value="name">🔤 이름순</option>
             </select>
+            <button id="view-grid-btn" class="view-toggle-btn active" title="그리드 뷰">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+            </button>
+            <button id="view-list-btn" class="view-toggle-btn" title="리스트 뷰">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+            </button>
           </div>
         </div>
 
         <!-- Tag Cloud -->
         <div id="tag-cloud" class="tag-cloud">
-          <!-- Tag pills rendered by js/app.js -->
+          <!-- Rendered by js/app.js -->
         </div>
       </div>
 
       <!-- Results Meta -->
-      <div class="results-meta">
-        <span id="results-count">전체 23개 저장소 로딩 중...</span>
-        <button id="reset-filter-btn" class="btn-reset-filter">필터 초기화</button>
+      <div class="results-meta" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--text-muted);">
+        <span id="results-count">전체 리포지토리 동기화 중...</span>
+        <button id="reset-filter-btn" class="btn-reset-filter" style="color: var(--accent-primary); font-weight: 600; text-decoration: underline;">필터 초기화</button>
       </div>
 
-      <!-- Repositories Grid -->
+      <!-- Main Repositories Grid Container -->
       <div id="repo-grid" class="repo-grid">
         <!-- Rendered by js/app.js -->
       </div>
@@ -210,141 +278,127 @@
         <div>
           <div class="section-tag">Tech Competencies</div>
           <h2 class="section-title">기술 역량 &amp; 스택 매트릭스</h2>
-          <p class="section-desc">리포지토리 구현을 통해 입증된 핵심 기술 스택과 실전 활용 역량입니다.</p>
+          <p class="section-desc">실제 리포지토리 구현을 통해 입증된 핵심 기술 스택과 실전 활용 역량입니다.</p>
         </div>
       </div>
 
-      <div class="skills-grid">
-        <!-- 1. Languages -->
-        <div class="skill-category-card">
-          <div class="skill-cat-header">
-            <div class="skill-cat-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      <div class="skills-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+        <!-- Languages -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent-primary);">프로그래밍 언어</h3>
+          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span><span style="color: #f34b7d;">●</span> C++ (17/20)</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">WinAPI / MFC / UE5</span>
             </div>
-            <h3 class="skill-cat-title">프로그래밍 언어</h3>
-          </div>
-          <div class="skill-item-list">
-            <div class="skill-item">
-              <span class="skill-name"><span style="color: #f34b7d;">●</span> C++ (17/20)</span>
-              <span class="skill-level-badge">WinAPI / MFC / UE5</span>
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span><span style="color: #178600;">●</span> C#</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">Unity / Fusion 2</span>
             </div>
-            <div class="skill-item">
-              <span class="skill-name"><span style="color: #178600;">●</span> C#</span>
-              <span class="skill-level-badge">Unity / 넷코드</span>
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span><span style="color: #3572A5;">●</span> Python</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">PyTorch / IPIU 2026</span>
             </div>
-            <div class="skill-item">
-              <span class="skill-name"><span style="color: #3572A5;">●</span> Python</span>
-              <span class="skill-level-badge">PyTorch / 비전 연구</span>
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span><span style="color: #3178c6;">●</span> TypeScript / JS</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">Pure WebGL 엔진</span>
             </div>
-            <div class="skill-item">
-              <span class="skill-name"><span style="color: #3178c6;">●</span> TypeScript / JS</span>
-              <span class="skill-level-badge">WebGL / 엔진 개발</span>
-            </div>
-            <div class="skill-item">
-              <span class="skill-name"><span style="color: #b07219;">●</span> Java</span>
-              <span class="skill-level-badge">OOP 설계 원칙</span>
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span><span style="color: #b07219;">●</span> Java</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">OOP 설계 패턴</span>
             </div>
           </div>
         </div>
 
-        <!-- 2. Game Engines & Graphics -->
-        <div class="skill-category-card">
-          <div class="skill-cat-header">
-            <div class="skill-cat-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="12" x="2" y="6" rx="6"/><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/></svg>
+        <!-- Engines & Graphics -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent-cyan);">엔진 &amp; 그래픽스</h3>
+          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span>Unity (URP &middot; HDRP)</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">버전 6 / 셰이더그래프</span>
             </div>
-            <h3 class="skill-cat-title">엔진 &amp; 그래픽스</h3>
-          </div>
-          <div class="skill-item-list">
-            <div class="skill-item">
-              <span class="skill-name">Unity (URP &middot; HDRP)</span>
-              <span class="skill-level-badge">버전 6 / 쉐이더</span>
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span>Unreal Engine 5</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">C++ / 데이터에셋</span>
             </div>
-            <div class="skill-item">
-              <span class="skill-name">Unreal Engine 5</span>
-              <span class="skill-level-badge">C++ / 인풋 / 데이터에셋</span>
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span>Pure WebGL 1.0/2.0</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">선형대수 자체 구현</span>
             </div>
-            <div class="skill-item">
-              <span class="skill-name">Pure WebGL 1.0/2.0</span>
-              <span class="skill-level-badge">선형대수 자체 구현</span>
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span>ShaderLab / HLSL</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">커스텀 렌더링</span>
             </div>
-            <div class="skill-item">
-              <span class="skill-name">ShaderLab / HLSL</span>
-              <span class="skill-level-badge">커스텀 렌더링</span>
-            </div>
-            <div class="skill-item">
-              <span class="skill-name">Win32 API &middot; GDI</span>
-              <span class="skill-level-badge">더블버퍼링 / 툴 개발</span>
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span>Win32 API &middot; GDI</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">더블버퍼링 / 툴 개발</span>
             </div>
           </div>
         </div>
 
-        <!-- 3. AI & Deep Learning -->
-        <div class="skill-category-card">
-          <div class="skill-cat-header">
-            <div class="skill-cat-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+        <!-- AI & Systems -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent-emerald);">AI &amp; 시스템 엔지니어링</h3>
+          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span>Stereo Matching &middot; Prior</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">IPIU 2026 논문</span>
             </div>
-            <h3 class="skill-cat-title">AI &amp; 컴퓨터 비전</h3>
-          </div>
-          <div class="skill-item-list">
-            <div class="skill-item">
-              <span class="skill-name">Stereo Matching &middot; Prior</span>
-              <span class="skill-level-badge">IPIU 2026 논문</span>
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span>Photon Fusion 2</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">Host Mode 실시간 동기화</span>
             </div>
-            <div class="skill-item">
-              <span class="skill-name">FoundationStereo</span>
-              <span class="skill-level-badge">잠재 지식 프로빙</span>
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span>알고리즘 &amp; 자료구조</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">백준 70+ 고난도 해결</span>
             </div>
-            <div class="skill-item">
-              <span class="skill-name">PyTorch &middot; CUDA</span>
-              <span class="skill-level-badge">파이프라인 구축</span>
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span>Multimodal (Qwen-VL)</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">MMMU 벤치마크</span>
             </div>
-            <div class="skill-item">
-              <span class="skill-name">Multimodal (Qwen-VL)</span>
-              <span class="skill-level-badge">MMMU 벤치마크</span>
-            </div>
-            <div class="skill-item">
-              <span class="skill-name">Computer Vision</span>
-              <span class="skill-level-badge">기하 복원 / 객체 분류</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. Systems, Networking & Tools -->
-        <div class="skill-category-card">
-          <div class="skill-cat-header">
-            <div class="skill-cat-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10"/><path d="M7 12h10"/><path d="M7 17h10"/></svg>
-            </div>
-            <h3 class="skill-cat-title">네트워킹 &amp; 도구</h3>
-          </div>
-          <div class="skill-item-list">
-            <div class="skill-item">
-              <span class="skill-name">Photon Fusion 2</span>
-              <span class="skill-level-badge">Host Mode 실시간 동기화</span>
-            </div>
-            <div class="skill-item">
-              <span class="skill-name">알고리즘 &amp; 자료구조</span>
-              <span class="skill-level-badge">백준 70+ 고난도 해결</span>
-            </div>
-            <div class="skill-item">
-              <span class="skill-name">Git &amp; GitHub</span>
-              <span class="skill-level-badge">교육 교재 자체 집필</span>
-            </div>
-            <div class="skill-item">
-              <span class="skill-name">Node.js &middot; Express</span>
-              <span class="skill-level-badge">웹 서버 &amp; 호스팅</span>
-            </div>
-            <div class="skill-item">
-              <span class="skill-name">넥슨 MSW (mLua)</span>
-              <span class="skill-level-badge">해커톤 게임 개발</span>
+            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
+              <span>Git &amp; GitHub</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">교육 교재 자체 집필</span>
             </div>
           </div>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- ===================================================================
+       Developer CLI Terminal Modal
+       =================================================================== -->
+  <div id="terminal-modal" class="terminal-modal-overlay">
+    <div class="terminal-window">
+      <div class="terminal-titlebar">
+        <div class="terminal-dots">
+          <span class="term-dot red" onclick="closeTerminal()"></span>
+          <span class="term-dot yellow"></span>
+          <span class="term-dot green"></span>
+        </div>
+        <span style="color: var(--text-muted); font-size: 0.78rem;">dust9826@showcase-cli: ~</span>
+        <button onclick="closeTerminal()" style="color: var(--text-muted); font-size: 0.85rem;">✕</button>
+      </div>
+      <div id="terminal-body" class="terminal-body">
+        <div class="terminal-output">
+  __  __         _    ___   ___  ____    ____  _                                    
+ |  \/  | _   _ | |_ / _ \ ( _ )|___ \  / ___|| |__    ___  _   _ _   _  ___  ___  
+ | |\/| || | | || __| (_) |/ _ \  __) | \___ \| '_ \  / _ \| | | | | | |/ __|/ _ \ 
+ | |  | || |_| || |_ \__, | (_) |/ __/   ___) | | | || (_) | |_| | |_| |\__ \  __/ 
+ |_|  |_| \__,_| \__|  /_/ \___/|_____| |____/|_| |_| \___/ \__,_|\__,_||___/\___| 
+
+Welcome to dust9826 Interactive CLI!
+Type <span style="color: var(--accent-emerald); font-weight: bold;">help</span> for commands, or <span style="color: var(--accent-cyan); font-weight: bold;">repos</span> to list all repositories.
+        </div>
+        <div class="terminal-prompt-row">
+          <span class="term-prompt">dust9826@showcase:~$ </span>
+          <input type="text" id="terminal-input" class="term-input" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ===================================================================
        Project Detail Modal Popup
@@ -360,10 +414,11 @@
       </div>
 
       <div class="modal-content">
-        <div class="modal-meta-row">
+        <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.7rem;">
           <span id="modal-category" class="repo-category-pill">Category</span>
-          <span id="modal-period" class="repo-badge-tag">Period</span>
-          <span id="modal-team" class="repo-badge-tag">Team</span>
+          <span id="modal-period" style="font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 9999px; background: var(--bg-tertiary); border: 1px solid var(--border-color);">Period</span>
+          <span id="modal-team" style="font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 9999px; background: var(--bg-tertiary); border: 1px solid var(--border-color);">Team</span>
+          <span id="modal-diff-badge"></span>
         </div>
 
         <h2 id="modal-title" class="modal-title">Project Title</h2>
@@ -393,17 +448,17 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/></svg>
           <span>사용 기술 스택</span>
         </h3>
-        <div id="modal-tech" class="modal-tech-box"></div>
+        <div id="modal-tech" style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem;"></div>
 
         <!-- Git Clone Box -->
-        <h3 class="modal-section-title" style="margin-top: 1.8rem;">
+        <h3 class="modal-section-title" style="margin-top: 1.5rem;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
           <span>로컬 클론 명령어</span>
         </h3>
         <div class="clone-box">
           <span id="modal-clone-cmd">git clone ...</span>
           <button class="btn-copy-clone" onclick="copyModalClone()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
             <span>복사</span>
           </button>
         </div>
@@ -434,16 +489,16 @@
   <footer class="footer">
     <div class="container">
       <div class="footer-top">
-        <div class="footer-brand">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
           <img src="https://avatars.githubusercontent.com/u/68475923?v=4" alt="avatar" style="width: 2.2rem; height: 2.2rem; border-radius: 50%;">
           <div>
             <strong>Jeonghyeon Kim</strong>
-            <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 0.5rem;">@dust9826</span>
+            <span style="color: var(--text-muted); font-size: 0.82rem; margin-left: 0.4rem;">@dust9826</span>
           </div>
         </div>
 
         <div class="footer-copy">
-          &copy; 2026 dust9826. Hosted on GitHub Pages.
+          &copy; 2026 dust9826. Live Synchronized on GitHub Pages.
         </div>
       </div>
     </div>
@@ -451,6 +506,7 @@
 
   <!-- Scripts -->
   <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

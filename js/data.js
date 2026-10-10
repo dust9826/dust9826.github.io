@@ -738,3 +738,12 @@ const SHOWCASE_STATS = {
     { id: "education", label: "Education & Tools", icon: "book", count: 1 }
   ]
 };
+
+// Export to window for global browser availability
+if (typeof window !== 'undefined') {
+  window.REPOSITORIES_DATA = REPOSITORIES_DATA;
+  window.SHOWCASE_STATS = SHOWCASE_STATS;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { REPOSITORIES_DATA, SHOWCASE_STATS };
+}
