@@ -34,7 +34,9 @@
   <header class="navbar">
     <div class="container nav-container">
       <a href="#hero" class="brand">
-        <img id="nav-avatar" src="https://avatars.githubusercontent.com/u/68475923?v=4" alt="dust9826 avatar" class="brand-avatar">
+        <div class="brand-tech-logo-wrap">
+          <img src="assets/logo.svg" alt="dust9826 tech logo" class="brand-tech-logo">
+        </div>
         <div class="brand-title">
           <span class="brand-name">Jeonghyeon Kim</span>
           <span class="brand-tag">@dust9826</span>
@@ -46,8 +48,8 @@
         <ul class="nav-menu">
           <li><a href="#hero" class="nav-link">소개</a></li>
           <li><a href="#featured" class="nav-link">플래그십</a></li>
-          <li><a href="#explorer" class="nav-link">리포지토리</a></li>
           <li><a href="#tech-stack" class="nav-link">기술 스택</a></li>
+          <li><a href="#explorer" class="nav-link">리포지토리</a></li>
           <li><button id="open-terminal-btn" class="nav-link" style="color: var(--accent-emerald);">💻 CLI 터미널</button></li>
         </ul>
       </nav>
@@ -75,7 +77,9 @@
     <div class="mobile-drawer">
       <div class="drawer-header">
         <div class="brand">
-          <img src="https://avatars.githubusercontent.com/u/68475923?v=4" alt="dust9826" class="brand-avatar">
+          <div class="brand-tech-logo-wrap" style="width: 2.1rem; height: 2.1rem;">
+            <img src="assets/logo.svg" alt="dust9826" class="brand-tech-logo" style="width: 1.4rem; height: 1.4rem;">
+          </div>
           <span class="brand-name">김정현</span>
         </div>
         <button id="close-drawer-btn" class="icon-btn" aria-label="메뉴 닫기">
@@ -85,8 +89,8 @@
       <ul class="drawer-links">
         <li><a href="#hero" class="drawer-link" onclick="closeMobileDrawer()">🏠 전체 소개</a></li>
         <li><a href="#featured" class="drawer-link" onclick="closeMobileDrawer()">⭐ 주요 플래그십</a></li>
-        <li><a href="#explorer" class="drawer-link" onclick="closeMobileDrawer()">📂 리포지토리 탐색</a></li>
         <li><a href="#tech-stack" class="drawer-link" onclick="closeMobileDrawer()">🛠️ 기술 스택 매트릭스</a></li>
+        <li><a href="#explorer" class="drawer-link" onclick="closeMobileDrawer()">📂 리포지토리 탐색</a></li>
         <li><button class="drawer-link" style="width: 100%; text-align: left; color: var(--accent-emerald);" onclick="closeMobileDrawer(); openTerminal();">💻 CLI 터미널 실행</button></li>
         <li><a href="https://github.com/dust9826" target="_blank" rel="noopener noreferrer" class="drawer-link">↗ GitHub 공식 프로필</a></li>
       </ul>
@@ -205,21 +209,21 @@
   </section>
 
   <!-- ===================================================================
-       Repository Explorer (Filter, Search & Grid)
+       Tech Stack & Repository Explorer (Combined Unified Section)
        =================================================================== -->
   <section id="explorer" class="section">
     <div class="container">
       <div class="section-header">
         <div>
-          <div class="section-tag">Repository Explorer</div>
-          <h2 class="section-title">기술 도메인별 리포지토리 탐색</h2>
-          <p class="section-desc">모든 깃허브 저장소를 기술 스택과 도메인별로 분류하여 상세 분석 및 클론 명령어를 제공합니다.</p>
+          <div class="section-tag">Tech Stack &amp; Repositories</div>
+          <h2 class="section-title">기술 스택 &amp; 리포지토리 탐색</h2>
+          <p class="section-desc">원하는 기술 로고 마크를 클릭하여 해당 언어/엔진/프레임워크의 프로젝트를 실시간으로 필터링하세요.</p>
         </div>
       </div>
 
-      <!-- Sticky Controls -->
+      <!-- Sticky Controls: Category Tabs, Search Bar & Tech Logo Matrix -->
       <div class="explorer-controls">
-        <!-- Category Tabs -->
+        <!-- Category Domain Tabs -->
         <div id="category-tabs" class="category-tabs">
           <!-- Rendered by js/app.js -->
         </div>
@@ -250,9 +254,18 @@
           </div>
         </div>
 
-        <!-- Tag Cloud -->
-        <div id="tag-cloud" class="tag-cloud">
-          <!-- Rendered by js/app.js -->
+        <!-- Interactive Tech Logo Matrix Filter Box -->
+        <div class="tech-matrix-wrapper">
+          <div class="tech-matrix-header">
+            <span class="tech-matrix-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10"/><path d="M7 12h10"/><path d="M7 17h10"/></svg>
+              <span>기술 스택 로고 매트릭스 필터</span>
+            </span>
+            <span id="active-tech-indicator" class="tech-matrix-hint">원하는 기술 마크를 클릭하여 필터링하세요</span>
+          </div>
+          <div id="tech-logo-grid" class="tech-logo-grid">
+            <!-- Rendered by js/app.js with authentic vector tech logos -->
+          </div>
         </div>
       </div>
 
@@ -265,104 +278,6 @@
       <!-- Main Repositories Grid Container -->
       <div id="repo-grid" class="repo-grid">
         <!-- Rendered by js/app.js -->
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================================================================
-       Tech Stack Matrix Section
-       =================================================================== -->
-  <section id="tech-stack" class="section">
-    <div class="container">
-      <div class="section-header">
-        <div>
-          <div class="section-tag">Tech Competencies</div>
-          <h2 class="section-title">기술 역량 &amp; 스택 매트릭스</h2>
-          <p class="section-desc">실제 리포지토리 구현을 통해 입증된 핵심 기술 스택과 실전 활용 역량입니다.</p>
-        </div>
-      </div>
-
-      <div class="skills-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
-        <!-- Languages -->
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem;">
-          <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent-primary);">프로그래밍 언어</h3>
-          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span><span style="color: #f34b7d;">●</span> C++ (17/20)</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">WinAPI / MFC / UE5</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span><span style="color: #178600;">●</span> C#</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">Unity / Fusion 2</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span><span style="color: #3572A5;">●</span> Python</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">PyTorch / IPIU 2026</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span><span style="color: #3178c6;">●</span> TypeScript / JS</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">Pure WebGL 엔진</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span><span style="color: #b07219;">●</span> Java</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">OOP 설계 패턴</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Engines & Graphics -->
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem;">
-          <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent-cyan);">엔진 &amp; 그래픽스</h3>
-          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span>Unity (URP &middot; HDRP)</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">버전 6 / 셰이더그래프</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span>Unreal Engine 5</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">C++ / 데이터에셋</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span>Pure WebGL 1.0/2.0</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">선형대수 자체 구현</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span>ShaderLab / HLSL</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">커스텀 렌더링</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span>Win32 API &middot; GDI</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">더블버퍼링 / 툴 개발</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- AI & Systems -->
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem;">
-          <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--accent-emerald);">AI &amp; 시스템 엔지니어링</h3>
-          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span>Stereo Matching &middot; Prior</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">IPIU 2026 논문</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span>Photon Fusion 2</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">Host Mode 실시간 동기화</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span>알고리즘 &amp; 자료구조</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">백준 70+ 고난도 해결</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span>Multimodal (Qwen-VL)</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">MMMU 벤치마크</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.55rem 0.8rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.86rem;">
-              <span>Git &amp; GitHub</span>
-              <span style="color: var(--text-muted); font-size: 0.75rem;">교육 교재 자체 집필</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </section>
