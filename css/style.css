@@ -1030,27 +1030,29 @@ button {
 
 .tech-logo-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 0.75rem;
 }
 
-@media (min-width: 480px) {
+@media (min-width: 640px) {
   .tech-logo-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+    gap: 0.9rem;
   }
 }
 
 .tech-mark-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.65rem 0.85rem;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  padding: 0.65rem;
   border-radius: var(--radius-md);
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  transition: all var(--transition-fast);
+  transition: all var(--transition-normal);
   cursor: pointer;
   position: relative;
   user-select: none;
@@ -1060,55 +1062,109 @@ button {
   background: var(--bg-card-hover);
   color: var(--text-primary);
   border-color: var(--accent-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 8px 22px rgba(99, 102, 241, 0.28);
+  z-index: 20;
 }
 
 .tech-mark-btn.active {
-  background: rgba(99, 102, 241, 0.15);
+  background: rgba(99, 102, 241, 0.2);
   border-color: var(--accent-primary);
   color: var(--text-primary);
-  box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 0 18px rgba(99, 102, 241, 0.45);
+  transform: translateY(-2px);
 }
 
 .tech-icon-wrap {
-  width: 1.85rem;
-  height: 1.85rem;
+  width: 2.75rem;
+  height: 2.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: transform var(--transition-fast);
 }
 
-.tech-icon-wrap svg {
+@media (min-width: 640px) {
+  .tech-icon-wrap {
+    width: 3.1rem;
+    height: 3.1rem;
+  }
+}
+
+.tech-mark-btn:hover .tech-icon-wrap {
+  transform: scale(1.1);
+}
+
+.tech-icon-wrap svg,
+.tech-icon-wrap img,
+.tech-icon-img {
   width: 100%;
   height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
   display: block;
 }
 
+/* 텍스트 설명은 감추고 마우스를 올리면 툴팁 배지로 선명하게 표시 */
 .tech-mark-info {
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  padding: 0.4rem 0.65rem;
+  border-radius: var(--radius-sm);
   display: flex;
   flex-direction: column;
-  line-height: 1.2;
-  flex-grow: 1;
-  text-align: left;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  white-space: nowrap;
+  z-index: 100;
+}
+
+.tech-mark-info::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--bg-secondary) transparent transparent transparent;
+}
+
+.tech-mark-btn:hover .tech-mark-info,
+.tech-mark-btn:focus-visible .tech-mark-info {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
 }
 
 .tech-mark-name {
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  white-space: nowrap;
+  color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .tech-mark-count {
-  font-size: 0.7rem;
-  color: var(--text-muted);
+  font-size: 0.68rem;
+  color: var(--accent-cyan);
   font-family: var(--font-mono);
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .tech-mark-btn.active .tech-mark-count {
   color: var(--accent-primary);
-  font-weight: 700;
 }
 
 /* ===================================================================
@@ -1519,98 +1575,6 @@ button {
   line-height: 1.5;
 }
 
-/* ===================================================================
-   Developer CLI Terminal Modal
-   =================================================================== */
-.terminal-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition-normal);
-}
-
-.terminal-modal-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.terminal-window {
-  width: 100%;
-  max-width: 680px;
-  background: #0d1117;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  overflow: hidden;
-  font-family: var(--font-mono);
-}
-
-.terminal-titlebar {
-  background: #161b22;
-  padding: 0.6rem 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.terminal-dots {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.term-dot {
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: var(--radius-full);
-}
-.term-dot.red { background: #ff5f56; }
-.term-dot.yellow { background: #ffbd2e; }
-.term-dot.green { background: #27c93f; }
-
-.terminal-body {
-  padding: 1.2rem;
-  height: 380px;
-  overflow-y: auto;
-  color: #e6edf3;
-  font-size: 0.85rem;
-  line-height: 1.6;
-}
-
-.terminal-output {
-  margin-bottom: 0.8rem;
-  white-space: pre-wrap;
-}
-
-.terminal-prompt-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.term-prompt {
-  color: var(--accent-emerald);
-  font-weight: 700;
-}
-
-.term-input {
-  flex: 1;
-  background: none;
-  border: none;
-  outline: none;
-  color: #fff;
-  font-family: inherit;
-  font-size: inherit;
-}
 
 /* ===================================================================
    Project Detail Modal

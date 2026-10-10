@@ -50,112 +50,106 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modalOverlay = document.getElementById('project-modal');
   const modalCloseBtn = document.getElementById('modal-close-btn');
   
-  // Terminal Modal
-  const terminalModal = document.getElementById('terminal-modal');
-  const terminalInput = document.getElementById('terminal-input');
-  const terminalBody = document.getElementById('terminal-body');
-  const openTerminalBtn = document.getElementById('open-terminal-btn');
-
   // =================================================================
-  // Authentic Tech Vector Logos (SVGs)
+  // Authentic Tech Official Vector Logos
   // =================================================================
   const TECH_MARKS = [
     {
       id: 'cpp',
       name: 'C++',
       color: '#00599C',
-      svg: `<svg viewBox="0 0 32 32"><path d="M16 3L4 9.9v13.8L16 30.6l12-6.9V9.9L16 3z" fill="#00599C"/><path d="M16 5.5l9.5 5.5v11L16 27.5 6.5 22V11L16 5.5z" fill="#004482"/><path d="M15.5 11.5c-3 0-5 2-5 5s2 5 5 5c2 0 3.5-.8 4.2-1.8l-1.8-1.2c-.5.7-1.3 1.2-2.4 1.2-1.8 0-3-1.4-3-3.2s1.2-3.2 3-3.2c1.1 0 1.9.5 2.4 1.2l1.8-1.2c-.7-1-2.2-1.8-4.2-1.8zm6 3v2h-2v1.5h2v2h1.5v-2h2v-1.5h-2v-2h-1.5zm6 0v2h-2v1.5h2v2h1.5v-2h2v-1.5h-2v-2h-1.5z" fill="#fff"/></svg>`,
+      svg: `<img src="assets/icons/cplusplus.svg" alt="C++" class="tech-icon-img">`,
       match: r => r.language === 'C++' || (r.tags || []).includes('C++')
     },
     {
       id: 'csharp',
       name: 'C#',
       color: '#239120',
-      svg: `<svg viewBox="0 0 32 32"><path d="M16 3L4 9.9v13.8L16 30.6l12-6.9V9.9L16 3z" fill="#68217A"/><path d="M16 5.5l9.5 5.5v11L16 27.5 6.5 22V11L16 5.5z" fill="#501860"/><path d="M14.5 11c-3.2 0-5.5 2.2-5.5 5.5s2.3 5.5 5.5 5.5c2.3 0 3.9-1 4.7-2.1l-2-1.3c-.6.8-1.6 1.4-2.7 1.4-2 0-3.3-1.5-3.3-3.5s1.3-3.5 3.3-3.5c1.1 0 2.1.6 2.7 1.4l2-1.3c-.8-1.1-2.4-2.1-4.7-2.1zm8 2.5h-1l-.4 1.5h1.2l-.3 1.5h-1.2l-.4 1.5h1.2l-.3 1.5h-1.2l-.5 2h-1.5l.5-2h-1.5l-.5 2h-1.5l.5-2H16l.3-1.5h1.5l.4-1.5H16.7l.3-1.5h1.5l.4-1.5h1.5l-.4 1.5h1.5l.4-1.5h1.5zm-3.2 3h-1.5l-.4 1.5h1.5l.4-1.5z" fill="#fff"/></svg>`,
+      svg: `<img src="assets/icons/csharp.svg" alt="C#" class="tech-icon-img">`,
       match: r => r.language === 'C#' || (r.tags || []).includes('C#')
     },
     {
       id: 'python',
       name: 'Python',
       color: '#3776AB',
-      svg: `<svg viewBox="0 0 32 32"><path d="M15.9 3c-4.4 0-7.1 1.9-7.1 4.4v3.2h7.3v1H6.8C4.5 11.6 3 13.5 3 16.5s1.9 4.9 4.2 4.9h2.5v-3.5c0-2.8 2.3-5 5.1-5h7.2v-2.3c0-4.3-3.7-7.6-6.1-7.6zm-2.4 2.2c.7 0 1.2.6 1.2 1.3 0 .7-.5 1.3-1.2 1.3-.7 0-1.3-.6-1.3-1.3 0-.7.6-1.3 1.3-1.3z" fill="#387EB8"/><path d="M16.1 29c4.4 0 7.1-1.9 7.1-4.4v-3.2h-7.3v-1h9.3c2.3 0 3.8-1.9 3.8-4.9s-1.9-4.9-4.2-4.9h-2.5v3.5c0 2.8-2.3 5-5.1 5h-7.2v2.3c0 4.4 3.7 7.6 6.1 7.6zm2.4-2.2c-.7 0-1.2-.6-1.2-1.3 0-.7.5-1.3 1.2-1.3.7 0 1.3.6 1.3 1.3 0 .7-.6 1.3-1.3 1.3z" fill="#FFE052"/></svg>`,
+      svg: `<img src="assets/icons/python.svg" alt="Python" class="tech-icon-img">`,
       match: r => r.language === 'Python' || (r.tags || []).includes('Python')
     },
     {
       id: 'typescript',
       name: 'TypeScript',
       color: '#3178C6',
-      svg: `<svg viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#3178C6"/><path d="M14.5 12h-8v2.5h2.6v9.5h2.8v-9.5h2.6V12zm6.2 5.2c-1.3-.6-2.2-1-2.2-1.7 0-.6.5-1 1.4-1 .9 0 1.7.4 2.2.9l1.6-1.8c-.9-.9-2.3-1.4-3.8-1.4-2.4 0-4.1 1.5-4.1 3.5 0 1.7 1.1 2.7 3 3.4 1.4.6 2 1 2 1.7 0 .7-.6 1.1-1.6 1.1-1.2 0-2.2-.6-2.8-1.3l-1.7 1.8c1.1 1.3 2.7 2 4.5 2 2.7 0 4.4-1.5 4.4-3.7 0-1.8-1.2-2.9-2.9-3.5z" fill="#fff"/></svg>`,
+      svg: `<img src="assets/icons/typescript.svg" alt="TypeScript" class="tech-icon-img">`,
       match: r => r.language === 'TypeScript' || (r.tags || []).includes('TypeScript')
     },
     {
       id: 'unity',
       name: 'Unity 6',
       color: '#222c37',
-      svg: `<svg viewBox="0 0 32 32"><path d="M16 4l-4 6.9h8L16 4zm-7.6 13.2l6.9 4v-8l-6.9 4zm15.2 0l-6.9-4v8l6.9-4zM7 11.2l-4 6.9 4 6.9 3.5-6-3.5-7.8zm18 0l-3.5 7.8 3.5 6 4-6.9-4-6.9zM12 28h8l-4-6.9L12 28z" fill="#fff"/></svg>`,
+      svg: `<img src="assets/icons/unity.svg" alt="Unity" class="tech-icon-img">`,
       match: r => (r.tags || []).some(t => t.toLowerCase().includes('unity')) || r.name.toLowerCase().includes('unity') || (r.description || '').toLowerCase().includes('unity')
     },
     {
       id: 'unreal',
       name: 'Unreal 5',
       color: '#0E1128',
-      svg: `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/><path d="M16 7c-5 0-9 4-9 9 0 3.3 1.8 6.2 4.5 7.7l1.5-2.6c-1.8-1-3-2.9-3-5.1 0-3.3 2.7-6 6-6s6 2.7 6 6c0 2.2-1.2 4.1-3 5.1l1.5 2.6C23.2 22.2 25 19.3 25 16c0-5-4-9-9-9zm-2.5 5v5.5c0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5V12h2v5.5c0 2.5-2 4.5-4.5 4.5S11.5 20 11.5 17.5V12h2z" fill="#fff"/></svg>`,
+      svg: `<img src="assets/icons/unrealengine.svg" alt="Unreal Engine" class="tech-icon-img">`,
       match: r => (r.tags || []).some(t => t.toLowerCase().includes('unreal')) || (r.description || '').toLowerCase().includes('unreal')
     },
     {
       id: 'webgl',
       name: 'Pure WebGL',
       color: '#990000',
-      svg: `<svg viewBox="0 0 32 32"><polygon points="16,3 29,10.5 29,21.5 16,29 3,21.5 3,10.5" fill="none" stroke="#990000" stroke-width="2.2"/><polygon points="16,8 24,13 16,18 8,13" fill="#EE2726"/><polygon points="8,13 16,18 16,25 8,20" fill="#B31B1B"/><polygon points="24,13 16,18 16,25 24,20" fill="#7A0000"/><circle cx="16" cy="18" r="1.8" fill="#fff"/></svg>`,
+      svg: `<img src="assets/icons/webgl.svg" alt="WebGL" class="tech-icon-img">`,
       match: r => (r.tags || []).some(t => t.toLowerCase().includes('webgl')) || r.name.toLowerCase().includes('webgl')
     },
     {
       id: 'pytorch',
       name: 'PyTorch',
       color: '#EE4C2C',
-      svg: `<svg viewBox="0 0 32 32"><path d="M19.5 8.5L16 5l-3.5 3.5c-4.1 4.1-4.1 10.9 0 15 4.1 4.1 10.9 4.1 15 0l2-2-4.5-4.5-1.5 1.5c-2.5 2.5-6.5 2.5-9 0s-2.5-6.5 0-9l1.5-1.5z" fill="#EE4C2C"/><circle cx="21" cy="7" r="1.8" fill="#EE4C2C"/></svg>`,
+      svg: `<img src="assets/icons/pytorch.svg" alt="PyTorch" class="tech-icon-img">`,
       match: r => (r.tags || []).some(t => t.toLowerCase().includes('pytorch')) || (r.details && r.details.techStack && r.details.techStack.some(t => t.toLowerCase().includes('pytorch')))
     },
     {
       id: 'winapi',
       name: 'WinAPI / MFC',
       color: '#0078D7',
-      svg: `<svg viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#0078D7"/><rect x="6" y="6" width="9" height="9" fill="#fff"/><rect x="17" y="6" width="9" height="9" fill="#fff"/><rect x="6" y="17" width="9" height="9" fill="#fff"/><rect x="17" y="17" width="9" height="9" fill="#fff"/></svg>`,
+      svg: `<img src="assets/icons/windows.svg" alt="Windows API / MFC" class="tech-icon-img">`,
       match: r => (r.tags || []).some(t => t.toLowerCase().includes('mfc') || t.toLowerCase().includes('winapi'))
     },
     {
       id: 'shader',
       name: 'ShaderLab/HLSL',
       color: '#8b5cf6',
-      svg: `<svg viewBox="0 0 32 32"><polygon points="16,4 27,25 5,25" fill="none" stroke="#8b5cf6" stroke-width="2"/><line x1="2" y1="16" x2="16" y2="16" stroke="#fff" stroke-width="1.8"/><line x1="16" y1="16" x2="28" y2="10" stroke="#f43f5e" stroke-width="1.8"/><line x1="16" y1="16" x2="29" y2="16" stroke="#10b981" stroke-width="1.8"/><line x1="16" y1="16" x2="28" y2="22" stroke="#06b6d4" stroke-width="1.8"/></svg>`,
+      svg: `<img src="assets/icons/opengl.svg" alt="ShaderLab/HLSL" class="tech-icon-img">`,
       match: r => r.language === 'ShaderLab' || (r.tags || []).some(t => t.toLowerCase().includes('shader'))
     },
     {
       id: 'photon',
       name: 'Photon Fusion',
       color: '#0284c7',
-      svg: `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="4.5" fill="#0284c7"/><circle cx="7" cy="8" r="3" fill="#38bdf8"/><circle cx="25" cy="8" r="3" fill="#38bdf8"/><circle cx="16" cy="27" r="3" fill="#38bdf8"/><line x1="9" y1="10" x2="13.5" y2="13.5" stroke="#38bdf8" stroke-width="1.5"/><line x1="23" y1="10" x2="18.5" y2="13.5" stroke="#38bdf8" stroke-width="1.5"/><line x1="16" y1="24" x2="16" y2="20.5" stroke="#38bdf8" stroke-width="1.5"/></svg>`,
+      svg: `<img src="assets/icons/photon.svg" alt="Photon Fusion" class="tech-icon-img">`,
       match: r => (r.tags || []).some(t => t.toLowerCase().includes('photon')) || (r.description || '').toLowerCase().includes('photon')
     },
     {
       id: 'java',
       name: 'Java (OOP)',
       color: '#EA2D2E',
-      svg: `<svg viewBox="0 0 32 32"><path d="M12.5 24.5c4 .4 8-.2 12-.9.7-.1 1.2.4.9 1-.9 1.8-4.2 3.2-8.5 3.2-5 0-8.9-1.8-8-3.4.3-.6 1.6-.2 3.6.1z" fill="#5382A1"/><path d="M21 21c3.5.3 7-.1 10.5-.7.6-.1 1 .4.7.9-.8 1.5-3.6 2.7-7.4 2.7-4.3 0-7.7-1.5-6.9-2.9.3-.5 1.4-.2 3.1 0z" fill="#E76F00"/><path d="M14 17.5c-3 1.8-4.3 3.6-2.9 4.7 1.4 1.1 5.3.8 8.7-.7s5.1-3.6 3.7-4.7c-1.4-1.1-6.5-1.1-9.5.7z" fill="#EA2D2E"/></svg>`,
+      svg: `<img src="assets/icons/java.svg" alt="Java" class="tech-icon-img">`,
       match: r => r.language === 'Java' || (r.tags || []).includes('Java')
     },
     {
       id: 'git',
       name: 'Git / OpenSource',
       color: '#F05032',
-      svg: `<svg viewBox="0 0 32 32"><path d="M28.7 14.3L17.7 3.3c-.8-.8-2.1-.8-2.9 0l-2.6 2.6 3.6 3.6c.9-.3 1.9-.1 2.6.6.7.7.9 1.7.6 2.6l3.5 3.5c.9-.3 1.9-.1 2.6.6 1 1 1 2.7 0 3.7s-2.7 1-3.7 0c-.8-.8-.9-1.9-.5-2.9l-3.2-3.2v8.5c.3.2.5.4.7.7 1 1 1 2.7 0 3.7s-2.7 1-3.7 0c-1-1-1-2.7 0-3.7.3-.3.8-.5 1.3-.6V14c-.5-.1-1-.4-1.3-.7-.8-.8-.9-1.9-.5-2.9L8.1 6.8 3.3 11.6c-.8.8-.8 2.1 0 2.9l11 11c.8.8 2.1.8 2.9 0l11.5-11.2z" fill="#F05032"/></svg>`,
+      svg: `<img src="assets/icons/git.svg" alt="Git" class="tech-icon-img">`,
       match: r => (r.tags || []).some(t => t.toLowerCase().includes('git')) || r.name === 'coala'
     },
     {
       id: 'javascript',
       name: 'JavaScript',
       color: '#F7DF1E',
-      svg: `<svg viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#F7DF1E"/><path d="M18.5 23.5c.8 1.4 1.9 2.2 3.6 2.2 1.6 0 2.6-.8 2.6-1.9 0-1.3-.9-1.8-2.5-2.5l-.9-.4c-2.4-1-4-2.3-4-5 0-2.5 1.9-4.4 4.8-4.4 2.1 0 3.5.7 4.5 2.5l-2.4 1.5c-.5-.9-1.1-1.3-2.1-1.3-1 0-1.7.6-1.7 1.5 0 1 .7 1.5 2.1 2.1l.9.4c2.8 1.2 4.4 2.4 4.4 5.3 0 3-2.3 4.7-5.5 4.7-3 0-4.9-1.5-5.9-3.5l2.1-1.2zm-8.8 2.5c-.8-.5-1.5-1.3-1.8-2.2l2.3-1.3c.3.6.6 1.1 1.2 1.4.6.3 1.3.3 1.8-.2.4-.4.6-1 .6-2.2v-9.6h2.7v9.7c0 1.8-.5 3.1-1.5 3.9-1 1-2.5 1.1-5.3.5z" fill="#000"/></svg>`,
+      svg: `<img src="assets/icons/javascript.svg" alt="JavaScript" class="tech-icon-img">`,
       match: r => r.language === 'JavaScript' || (r.tags || []).includes('JavaScript')
     }
   ];
@@ -395,16 +389,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!techLogoGrid) return;
 
     techLogoGrid.innerHTML = TECH_MARKS.map(mark => {
-      // Calculate how many repos match this tech mark in the current active domain
-      let scopeRepos = allRepositories;
-      if (currentCategory !== 'all') {
-        scopeRepos = scopeRepos.filter(r => r.category === currentCategory);
-      }
-      const matchingCount = scopeRepos.filter(mark.match).length;
+      const matchingCount = allRepositories.filter(mark.match).length;
       const isActive = activeTechMark === mark.id;
 
       return `
-        <button class="tech-mark-btn ${isActive ? 'active' : ''}" data-tech="${mark.id}" title="${mark.name} 프로젝트 필터링">
+        <button class="tech-mark-btn ${isActive ? 'active' : ''}" data-tech="${mark.id}" title="${mark.name} (${matchingCount}개 저장소)">
           <div class="tech-icon-wrap">
             ${mark.svg}
           </div>
@@ -423,6 +412,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           activeTechMark = null; // Toggle off
           if (activeTechIndicator) activeTechIndicator.innerText = '원하는 기술 마크를 클릭하여 필터링하세요';
         } else {
+          // 사용자의 요청: 기술 스택 로고 매트릭스 필터를 클릭하면 위쪽 카테고리는 자동으로 ALL로 변경
+          currentCategory = 'all';
+          renderCategoryTabs();
+          
           activeTechMark = techId;
           const found = TECH_MARKS.find(m => m.id === techId);
           if (activeTechIndicator) activeTechIndicator.innerHTML = `선택된 기술 필터: <strong style="color: var(--accent-cyan);">${found.name}</strong> (다시 누르면 해제)`;
@@ -696,124 +689,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // -----------------------------------------------------------------
-  // Interactive CLI Terminal Mode
-  // -----------------------------------------------------------------
-  window.openTerminal = function() {
-    if (!terminalModal) return;
-    terminalModal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    if (terminalInput) {
-      setTimeout(() => terminalInput.focus(), 150);
-    }
-  };
-
-  window.closeTerminal = function() {
-    if (!terminalModal) return;
-    terminalModal.classList.remove('active');
-    document.body.style.overflow = '';
-  };
-
-  function handleTerminalCommand(raw) {
-    const cmd = raw.trim().toLowerCase();
-    const parts = cmd.split(' ');
-    const action = parts[0];
-    const arg = parts.slice(1).join(' ');
-
-    let output = '';
-
-    switch (action) {
-      case 'help':
-        output = `
-Available commands:
-  repos, list       : 모든 리포지토리 목록 및 스타 수 출력
-  info <name>       : 특정 리포지토리 상세 정보 조회
-  clone <name>      : 깃 클론 명령어 클립보드 복사
-  theme             : 다크/라이트 테마 즉시 전환
-  sync              : GitHub 실시간 동기화 강제 실행
-  clear             : 터미널 화면 청소
-  exit              : 터미널 종료
-`;
-        break;
-
-      case 'repos':
-      case 'list':
-        output = allRepositories.map((r, i) => {
-          const tag = r.isNew ? '[NEW]' : (r.isDeleted ? '[DEL]' : '     ');
-          return `${tag} ${String(i + 1).padStart(2, ' ')}. ${r.name.padEnd(32, ' ')} [${r.language}] ★ ${r.stats.stars}`;
-        }).join('\n');
-        break;
-
-      case 'info':
-      case 'cat':
-        if (!arg) {
-          output = '사용법: info <리포지토리명> (예: info GGwaekGGwaek)';
-        } else {
-          const match = allRepositories.find(r => r.name.toLowerCase() === arg.toLowerCase());
-          if (match) {
-            output = `
-Repository: ${match.name}
-Title     : ${match.title}
-Domain    : ${match.categoryName}
-Language  : ${match.language}
-Stars/Fork: ★ ${match.stats.stars} / ⑂ ${match.stats.forks}
-Updated   : ${match.stats.relativePushed}
-URL       : ${match.githubUrl}
-Summary   : ${match.description}
-`;
-          } else {
-            output = `'${arg}' 저장소를 찾을 수 없습니다. 'repos'를 입력하여 목록을 확인하세요.`;
-          }
-        }
-        break;
-
-      case 'clone':
-        if (!arg) {
-          output = '사용법: clone <리포지토리명>';
-        } else {
-          const match = allRepositories.find(r => r.name.toLowerCase() === arg.toLowerCase());
-          if (match) {
-            copyCloneCommand(match.name);
-            output = `Copied to clipboard: git clone ${match.githubUrl}.git`;
-          } else {
-            output = `'${arg}' 저장소를 찾을 수 없습니다.`;
-          }
-        }
-        break;
-
-      case 'theme':
-        toggleTheme();
-        output = `테마가 변경되었습니다: ${document.documentElement.getAttribute('data-theme')}`;
-        break;
-
-      case 'sync':
-        performLiveSync(true);
-        output = 'GitHub 실시간 동기화 파이프라인을 실행했습니다.';
-        break;
-
-      case 'clear':
-        if (terminalBody) {
-          terminalBody.querySelector('.terminal-output').innerHTML = '';
-        }
-        return;
-
-      case 'exit':
-      case 'quit':
-        closeTerminal();
-        return;
-
-      default:
-        if (cmd) {
-          output = `command not found: ${action}. 'help'를 입력하여 명령어 목록을 확인하세요.`;
-        }
-    }
-
-    if (output && terminalBody) {
-      const outputDiv = terminalBody.querySelector('.terminal-output');
-      outputDiv.innerHTML += `\n<span style="color: var(--accent-emerald);">dust9826@showcase:~$</span> ${raw}\n${output}`;
-      terminalBody.scrollTop = terminalBody.scrollHeight;
-    }
-  }
 
   // -----------------------------------------------------------------
   // Event Listeners
@@ -886,20 +761,6 @@ Summary   : ${match.description}
     });
   }
 
-  if (openTerminalBtn) {
-    openTerminalBtn.addEventListener('click', openTerminal);
-  }
-
-  if (terminalInput) {
-    terminalInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        const val = terminalInput.value;
-        terminalInput.value = '';
-        handleTerminalCommand(val);
-      }
-    });
-  }
-
   if (modalCloseBtn) {
     modalCloseBtn.addEventListener('click', closeProjectModal);
   }
@@ -919,7 +780,6 @@ Summary   : ${match.description}
         searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     } else if (e.key === 'Escape') {
-      if (terminalModal && terminalModal.classList.contains('active')) closeTerminal();
       if (modalOverlay && modalOverlay.classList.contains('active')) closeProjectModal();
       if (mobileDrawerOverlay && mobileDrawerOverlay.classList.contains('open')) closeMobileDrawer();
     }
