@@ -62,6 +62,35 @@ document.addEventListener('DOMContentLoaded', async () => {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
   }
+
+  // -----------------------------------------------------------------
+  // Security URL Sanitizer (Blocks javascript: or data: injection)
+  // -----------------------------------------------------------------
+  function sanitizeUrl(url) {
+    if (!url || typeof url !== 'string') return '#';
+    const clean = url.trim();
+    return (/^https?:\/\//i.test(clean)) ? clean : '#';
+  }
+
+  // -----------------------------------------------------------------
+  // Safe Storage Wrapper (Prevents DOMException: SecurityError in private/incognito mode)
+  // -----------------------------------------------------------------
+  const safeStorage = {
+    getItem(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch (e) {
+        return null;
+      }
+    },
+    setItem(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch (e) {
+        // Silently fallback if storage is restricted
+      }
+    }
+  };
   
   // =================================================================
   // Authentic Tech Official Vector Logos
@@ -105,14 +134,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     {
       id: 'unreal',
       name: 'Unreal 5',
-      color: '#0E1128',
+      color: '#ffffff',
       svg: `<img src="assets/icons/unrealengine.svg" alt="Unreal Engine" class="tech-icon-img">`,
       match: r => (r.tags || []).some(t => t.toLowerCase().includes('unreal')) || (r.description || '').toLowerCase().includes('unreal')
     },
     {
       id: 'webgl',
       name: 'Pure WebGL',
-      color: '#990000',
+      color: '#ffffff',
       svg: `<img src="assets/icons/webgl.svg" alt="WebGL" class="tech-icon-img">`,
       match: r => (r.tags || []).some(t => t.toLowerCase().includes('webgl')) || r.name.toLowerCase().includes('webgl')
     },
@@ -182,7 +211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Theme Management
   // -----------------------------------------------------------------
   function initTheme() {
-    const saved = localStorage.getItem('dust_theme_pref') ||
+    const saved = safeStorage.getItem('dust_theme_pref') ||
       (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
     document.documentElement.setAttribute('data-theme', saved);
     updateThemeIcon(saved);
@@ -192,7 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const current = document.documentElement.getAttribute('data-theme') || 'dark';
     const next = current === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('dust_theme_pref', next);
+    safeStorage.setItem('dust_theme_pref', next);
     updateThemeIcon(next);
   }
 
@@ -229,13 +258,42 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // -----------------------------------------------------------------
-  // Copy to Clipboard
+  // Copy to Clipboard (with fallback for in-app webviews)
   // -----------------------------------------------------------------
   function copyCloneCommand(repoName) {
     const cmd = `git clone https://github.com/dust9826/${repoName}.git`;
-    navigator.clipboard.writeText(cmd).then(() => {
-      showToast(`클론 명령어가 복사되었습니다: ${repoName}`);
-    }).catch(err => console.error('Copy error', err));
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(cmd).then(() => {
+        showToast(`클론 명령어가 복사되었습니다: ${repoName}`);
+      }).catch(() => {
+        fallbackCopyText(cmd, repoName);
+      });
+    } else {
+      fallbackCopyText(cmd, repoName);
+    }
+  }
+
+  function fallbackCopyText(text, repoName) {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.top = '-9999px';
+      textArea.style.left = '-9999px';
+      textArea.setAttribute('readonly', '');
+      document.body.appendChild(textArea);
+      textArea.select();
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      if (successful) {
+        showToast(`클론 명령어가 복사되었습니다: ${repoName}`);
+      } else {
+        prompt('아래 클론 명령어를 직접 복사하세요:', text);
+      }
+    } catch (e) {
+      prompt('아래 클론 명령어를 직접 복사하세요:', text);
+    }
   }
 
   window.copyCloneCommand = copyCloneCommand;
@@ -358,7 +416,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <button class="btn-detail" onclick="openProjectModal('${escapeHtml(proj.id)}')">
                   ${ICONS.info} <span>상세 분석</span>
                 </button>
-                <a href="${encodeURI(proj.githubUrl)}" target="_blank" rel="noopener noreferrer" class="btn-repo-link" title="GitHub 방문">
+                <a href="${sanitizeUrl(proj.githubUrl)}" target="_blank" rel="noopener noreferrer" class="btn-repo-link" title="GitHub 방문">
                   ${ICONS.github}
                 </a>
                 <button class="btn-repo-link" onclick="copyCloneCommand('${escapeHtml(proj.name)}')" title="git clone 명령어 복사">
@@ -557,7 +615,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <button class="btn-card-action primary" onclick="openProjectModal('${escapeHtml(repo.id)}')">
               ${ICONS.info} <span>상세</span>
             </button>
-            <a href="${encodeURI(repo.githubUrl)}" target="_blank" rel="noopener noreferrer" class="btn-card-action" title="GitHub">
+            <a href="${sanitizeUrl(repo.githubUrl)}" target="_blank" rel="noopener noreferrer" class="btn-card-action" title="GitHub">
               ${ICONS.external}
             </a>
             <button class="btn-card-action" onclick="copyCloneCommand('${escapeHtml(repo.name)}')" title="Clone">
@@ -785,7 +843,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (modalGithubLink) {
-      modalGithubLink.href = repo.githubUrl;
+      modalGithubLink.href = sanitizeUrl(repo.githubUrl);
     }
 
     window._currentModalRepo = repo.name;

@@ -1134,6 +1134,12 @@ button {
   display: block;
 }
 
+/* 라이트 모드 전환 시 흰색 벡터 아이콘 가시성 자동 확보 */
+[data-theme="light"] .tech-mark-btn[data-tech="unreal"] .tech-icon-img,
+[data-theme="light"] .tech-mark-btn[data-tech="webgl"] .tech-icon-img {
+  filter: invert(1);
+}
+
 /* 텍스트 설명은 감추고 마우스를 올리면 툴팁 배지로 선명하게 표시 */
 .tech-mark-info {
   position: absolute;
