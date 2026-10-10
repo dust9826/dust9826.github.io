@@ -1075,6 +1075,33 @@ button {
   transform: translateY(-2px);
 }
 
+/* 비활성화(선택된 카테고리에 리포지토리가 없는 기술) 스타일 */
+.tech-mark-btn.is-disabled {
+  opacity: 0.25;
+  filter: grayscale(100%);
+  cursor: not-allowed;
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  box-shadow: none !important;
+}
+
+.tech-mark-btn.is-disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+.tech-mark-btn.is-disabled:hover .tech-icon-wrap {
+  transform: none;
+}
+
+.tech-mark-btn.is-disabled .tech-mark-count {
+  color: var(--text-muted);
+}
+
+
 .tech-icon-wrap {
   width: 2.75rem;
   height: 2.75rem;

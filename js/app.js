@@ -388,37 +388,86 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderTechLogoGrid() {
     if (!techLogoGrid) return;
 
+    // 현재 선택된 카테고리에 속한 리포지토리 목록 추출
+    const categoryRepos = (currentCategory === 'all')
+      ? allRepositories
+      : allRepositories.filter(r => r.category === currentCategory);
+
+    // 만약 기존에 선택되어 있던 기술이 변경된 카테고리에서 0개라면 안전하게 해제
+    if (activeTechMark) {
+      const activeMark = TECH_MARKS.find(m => m.id === activeTechMark);
+      if (!activeMark || categoryRepos.filter(activeMark.match).length === 0) {
+        activeTechMark = null;
+      }
+    }
+
+    const categoryLabels = {
+      all: '전체',
+      ai: 'AI & Vision',
+      game: '게임 & 그래픽스',
+      engine: '커스텀 엔진 & 웹',
+      algorithm: '알고리즘 & CS',
+      education: '교육 & 도구'
+    };
+    const currentCatName = categoryLabels[currentCategory] || '전체';
+
     techLogoGrid.innerHTML = TECH_MARKS.map(mark => {
-      const matchingCount = allRepositories.filter(mark.match).length;
-      const isActive = activeTechMark === mark.id;
+      const matchingCount = categoryRepos.filter(mark.match).length;
+      const isDisabled = matchingCount === 0;
+      const isActive = activeTechMark === mark.id && !isDisabled;
+      const disabledClass = isDisabled ? 'is-disabled' : '';
+      const activeClass = isActive ? 'active' : '';
+
+      const countText = isDisabled
+        ? '현재 카테고리에 없음'
+        : `${matchingCount}개 저장소`;
+
+      const titleText = isDisabled
+        ? `${mark.name} (${currentCatName} 카테고리에 해당 프로젝트 없음)`
+        : `${mark.name} (${matchingCount}개 저장소)`;
 
       return `
-        <button class="tech-mark-btn ${isActive ? 'active' : ''}" data-tech="${mark.id}" title="${mark.name} (${matchingCount}개 저장소)">
+        <button class="tech-mark-btn ${activeClass} ${disabledClass}" 
+                data-tech="${mark.id}" 
+                ${isDisabled ? 'aria-disabled="true"' : ''}
+                title="${titleText}">
           <div class="tech-icon-wrap">
             ${mark.svg}
           </div>
           <div class="tech-mark-info">
             <span class="tech-mark-name">${mark.name}</span>
-            <span class="tech-mark-count">${matchingCount}개 저장소</span>
+            <span class="tech-mark-count">${countText}</span>
           </div>
         </button>
       `;
     }).join('');
 
+    // 상단 힌트 텍스트(activeTechIndicator) 상태 업데이트
+    if (activeTechIndicator) {
+      if (activeTechMark) {
+        const found = TECH_MARKS.find(m => m.id === activeTechMark);
+        const prefix = currentCategory !== 'all' ? `[${currentCatName}] 내 ` : '';
+        activeTechIndicator.innerHTML = `${prefix}선택된 기술 필터: <strong style="color: var(--accent-cyan);">${found.name}</strong> (다시 누르면 해제)`;
+      } else {
+        if (currentCategory !== 'all') {
+          activeTechIndicator.innerHTML = `[${currentCatName}] 활성화된 기술 마크를 클릭하여 2단계 필터링하세요`;
+        } else {
+          activeTechIndicator.innerText = '원하는 기술 마크를 클릭하여 필터링하세요';
+        }
+      }
+    }
+
+    // 클릭 이벤트 바인딩
     techLogoGrid.querySelectorAll('.tech-mark-btn').forEach(btn => {
       btn.addEventListener('click', () => {
+        // 비활성화된 기술은 클릭 방지
+        if (btn.classList.contains('is-disabled')) return;
+
         const techId = btn.getAttribute('data-tech');
         if (activeTechMark === techId) {
           activeTechMark = null; // Toggle off
-          if (activeTechIndicator) activeTechIndicator.innerText = '원하는 기술 마크를 클릭하여 필터링하세요';
         } else {
-          // 사용자의 요청: 기술 스택 로고 매트릭스 필터를 클릭하면 위쪽 카테고리는 자동으로 ALL로 변경
-          currentCategory = 'all';
-          renderCategoryTabs();
-          
           activeTechMark = techId;
-          const found = TECH_MARKS.find(m => m.id === techId);
-          if (activeTechIndicator) activeTechIndicator.innerHTML = `선택된 기술 필터: <strong style="color: var(--accent-cyan);">${found.name}</strong> (다시 누르면 해제)`;
         }
         renderTechLogoGrid();
         applyFiltersAndRender();
