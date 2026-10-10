@@ -91,6 +91,33 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
   };
+
+  // -----------------------------------------------------------------
+  // Tech Stack Mini Logo Resolver
+  // -----------------------------------------------------------------
+  const TECH_ICON_RULES = [
+    { match: /(c\+\+|cpp)/i, icon: 'assets/icons/cplusplus.svg' },
+    { match: /c#/i, icon: 'assets/icons/csharp.svg' },
+    { match: /pytorch/i, icon: 'assets/icons/pytorch.svg' },
+    { match: /(python|jupyter)/i, icon: 'assets/icons/python.svg' },
+    { match: /unity/i, icon: 'assets/icons/unity.svg' },
+    { match: /unreal/i, icon: 'assets/icons/unrealengine.svg' },
+    { match: /webgl/i, icon: 'assets/icons/webgl.svg' },
+    { match: /(shader|hlsl|glsl|opengl)/i, icon: 'assets/icons/opengl.svg' },
+    { match: /(winapi|mfc|windows)/i, icon: 'assets/icons/windows.svg' },
+    { match: /photon/i, icon: 'assets/icons/photon.svg' },
+    { match: /typescript/i, icon: 'assets/icons/typescript.svg' },
+    { match: /(javascript|es6|mlua)/i, icon: 'assets/icons/javascript.svg' },
+    { match: /(node\.js|nodejs|express)/i, icon: 'assets/icons/nodejs.svg' },
+    { match: /\bjava\b/i, icon: 'assets/icons/java.svg' },
+    { match: /(git|github)/i, icon: 'assets/icons/git.svg' }
+  ];
+
+  function getTechIcon(tag) {
+    if (!tag || typeof tag !== 'string') return null;
+    const found = TECH_ICON_RULES.find(r => r.match.test(tag));
+    return found ? found.icon : null;
+  }
   
   // =================================================================
   // Authentic Tech Official Vector Logos
@@ -390,6 +417,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         ? `background-image: url('${proj.coverImage}');`
         : `background: ${proj.gradient};`;
 
+      const sortedProjTags = [...(proj.tags || [])].sort((a, b) => {
+        const hasA = getTechIcon(a) ? 1 : 0;
+        const hasB = getTechIcon(b) ? 1 : 0;
+        return hasB - hasA;
+      });
+
+      const featuredTagsHTML = sortedProjTags.slice(0, 5).map(t => {
+        const icon = getTechIcon(t);
+        if (icon) {
+          return `<span class="tag-pill tag-tech" title="${escapeHtml(t)}"><img src="${icon}" alt="${escapeHtml(t)}" class="tag-tech-logo" loading="lazy"><span>${escapeHtml(t)}</span></span>`;
+        }
+        return `<span class="tag-pill"><span>${escapeHtml(t)}</span></span>`;
+      }).join('');
+
+      const featuredLangIcon = getTechIcon(proj.language);
+      const featuredLangHTML = featuredLangIcon
+        ? `<img src="${featuredLangIcon}" alt="${escapeHtml(proj.language)}" class="lang-tech-logo" loading="lazy">`
+        : `<span class="lang-dot" style="background-color: ${proj.languageColor};"></span>`;
+
       return `
         <div class="featured-card" data-id="${escapeHtml(proj.id)}">
           <div class="featured-banner" style="${bannerBg}">
@@ -405,11 +451,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             <p class="featured-subtitle">${escapeHtml(proj.subtitle)}</p>
             <p class="featured-desc">${escapeHtml(proj.description)}</p>
             <div class="featured-tags">
-              ${proj.tags.slice(0, 5).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('')}
+              ${featuredTagsHTML}
             </div>
             <div class="featured-footer">
               <div class="lang-indicator">
-                <span class="lang-dot" style="background-color: ${proj.languageColor};"></span>
+                ${featuredLangHTML}
                 <span>${escapeHtml(proj.language)}</span>
               </div>
               <div class="action-btn-group">
@@ -584,6 +630,25 @@ document.addEventListener('DOMContentLoaded', async () => {
       badgeHTML = `<span style="font-size: 0.72rem; color: var(--text-muted);">${repo.period}</span>`;
     }
 
+    const sortedTags = [...(repo.tags || [])].sort((a, b) => {
+      const hasA = getTechIcon(a) ? 1 : 0;
+      const hasB = getTechIcon(b) ? 1 : 0;
+      return hasB - hasA;
+    });
+
+    const tagsHTML = sortedTags.slice(0, 4).map(t => {
+      const icon = getTechIcon(t);
+      if (icon) {
+        return `<span class="tag-pill tag-tech" title="${escapeHtml(t)}"><img src="${icon}" alt="${escapeHtml(t)}" class="tag-tech-logo" loading="lazy"><span>${escapeHtml(t)}</span></span>`;
+      }
+      return `<span class="tag-pill"><span>${escapeHtml(t)}</span></span>`;
+    }).join('');
+
+    const langIcon = getTechIcon(repo.language);
+    const langHTML = langIcon
+      ? `<img src="${langIcon}" alt="${escapeHtml(repo.language)}" class="lang-tech-logo" loading="lazy">`
+      : `<span class="lang-dot" style="background-color: ${repo.languageColor};"></span>`;
+
     return `
       <div class="repo-card ${isDel ? 'is-deleted' : ''}" data-id="${escapeHtml(repo.id)}">
         <div class="repo-card-top">
@@ -597,14 +662,14 @@ document.addEventListener('DOMContentLoaded', async () => {
           <p class="repo-card-desc">${escapeHtml(repo.description)}</p>
           
           <div class="repo-card-tags">
-            ${(repo.tags || []).slice(0, 4).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('')}
+            ${tagsHTML}
           </div>
         </div>
 
         <div class="repo-card-footer">
           <div class="repo-footer-left">
             <div class="lang-indicator">
-              <span class="lang-dot" style="background-color: ${repo.languageColor};"></span>
+              ${langHTML}
               <span>${escapeHtml(repo.language)}</span>
             </div>
             <span class="relative-time">${escapeHtml(relativeTime)}</span>
@@ -835,7 +900,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (modalTech) {
       const techList = (repo.details && repo.details.techStack) ? repo.details.techStack : repo.tags;
-      modalTech.innerHTML = (techList || []).map(t => `<span class="tag-pill" style="font-size: 0.82rem; padding: 0.25rem 0.75rem;">${escapeHtml(t)}</span>`).join('');
+      const sortedTechList = [...(techList || [])].sort((a, b) => {
+        const hasA = getTechIcon(a) ? 1 : 0;
+        const hasB = getTechIcon(b) ? 1 : 0;
+        return hasB - hasA;
+      });
+      modalTech.innerHTML = sortedTechList.map(t => {
+        const icon = getTechIcon(t);
+        if (icon) {
+          return `<span class="tag-pill tag-tech" style="font-size: 0.82rem; padding: 0.25rem 0.75rem;" title="${escapeHtml(t)}"><img src="${icon}" alt="${escapeHtml(t)}" class="tag-tech-logo" loading="lazy"><span>${escapeHtml(t)}</span></span>`;
+        }
+        return `<span class="tag-pill" style="font-size: 0.82rem; padding: 0.25rem 0.75rem;"><span>${escapeHtml(t)}</span></span>`;
+      }).join('');
     }
 
     if (modalCloneCmd) {

@@ -771,13 +771,58 @@ button {
 
 .tag-pill {
   font-size: 0.72rem;
-  padding: 0.2rem 0.6rem;
+  padding: 0.22rem 0.55rem;
   border-radius: var(--radius-sm);
   background: var(--bg-tertiary);
   color: var(--text-secondary);
   font-weight: 500;
   border: 1px solid var(--border-color);
   font-family: var(--font-mono);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  line-height: 1.2;
+}
+
+.tag-pill.tag-tech {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+}
+
+.tag-tech-logo {
+  width: 0.88rem;
+  height: 0.88rem;
+  max-width: 14px;
+  max-height: 14px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.lang-tech-logo {
+  width: 0.95rem;
+  height: 0.95rem;
+  max-width: 15px;
+  max-height: 15px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+[data-theme="light"] .tag-pill.tag-tech {
+  background: #f1f5f9;
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .tag-tech-logo[src*="unrealengine"],
+[data-theme="light"] .tag-tech-logo[src*="webgl"],
+[data-theme="light"] .lang-tech-logo[src*="unrealengine"],
+[data-theme="light"] .lang-tech-logo[src*="webgl"] {
+  filter: invert(1);
 }
 
 .featured-footer {
