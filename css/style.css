@@ -790,11 +790,84 @@ button {
   color: var(--text-primary);
 }
 
+.tag-pill.tag-tech.tag-icon-only {
+  padding: 0.25rem 0.4rem;
+  min-width: 36px;
+  height: 34px;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  border-radius: var(--radius-md);
+  transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tag-pill.tag-tech.tag-icon-only:hover {
+  transform: translateY(-2px) scale(1.06);
+  border-color: var(--accent-blue);
+  background: rgba(59, 130, 246, 0.22);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.tag-pill.tag-tech.tag-icon-only .tag-tech-logo {
+  width: 24px;
+  height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  display: block;
+}
+
+/* Instant CSS Micro-Tooltip on hover */
+.tag-pill.tag-tech.tag-icon-only[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(15, 23, 42, 0.96);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  z-index: 50;
+  font-family: var(--font-sans);
+}
+
+.tag-pill.tag-tech.tag-icon-only[data-tooltip]::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  border: 6px solid transparent;
+  border-top-color: rgba(15, 23, 42, 0.96);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  z-index: 51;
+}
+
+.tag-pill.tag-tech.tag-icon-only:hover::after,
+.tag-pill.tag-tech.tag-icon-only:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
 .tag-tech-logo {
-  width: 0.88rem;
-  height: 0.88rem;
-  max-width: 14px;
-  max-height: 14px;
+  width: 1.5rem;
+  height: 1.5rem;
+  max-width: 24px;
+  max-height: 24px;
   object-fit: contain;
   flex-shrink: 0;
   display: inline-block;
@@ -802,10 +875,10 @@ button {
 }
 
 .lang-tech-logo {
-  width: 0.95rem;
-  height: 0.95rem;
-  max-width: 15px;
-  max-height: 15px;
+  width: 1.25rem;
+  height: 1.25rem;
+  max-width: 20px;
+  max-height: 20px;
   object-fit: contain;
   flex-shrink: 0;
   display: inline-block;
@@ -816,6 +889,28 @@ button {
   background: #f1f5f9;
   border-color: rgba(0, 0, 0, 0.1);
   color: var(--text-primary);
+}
+
+[data-theme="light"] .tag-pill.tag-tech.tag-icon-only {
+  background: #f1f5f9;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .tag-pill.tag-tech.tag-icon-only:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--accent-blue);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .tag-pill.tag-tech.tag-icon-only[data-tooltip]::after {
+  background: #1e293b;
+  color: #ffffff;
+  border-color: rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .tag-pill.tag-tech.tag-icon-only[data-tooltip]::before {
+  border-top-color: #1e293b;
 }
 
 [data-theme="light"] .tag-tech-logo[src*="unrealengine"],

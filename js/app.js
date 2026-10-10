@@ -423,10 +423,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         return hasB - hasA;
       });
 
-      const featuredTagsHTML = sortedProjTags.slice(0, 5).map(t => {
+      const featuredTagsHTML = sortedProjTags.slice(0, 6).map(t => {
         const icon = getTechIcon(t);
         if (icon) {
-          return `<span class="tag-pill tag-tech" title="${escapeHtml(t)}"><img src="${icon}" alt="${escapeHtml(t)}" class="tag-tech-logo" loading="lazy"><span>${escapeHtml(t)}</span></span>`;
+          return `<span class="tag-pill tag-tech tag-icon-only" title="${escapeHtml(t)}" data-tooltip="${escapeHtml(t)}" aria-label="${escapeHtml(t)}"><img src="${icon}" alt="${escapeHtml(t)}" class="tag-tech-logo" loading="lazy"></span>`;
         }
         return `<span class="tag-pill"><span>${escapeHtml(t)}</span></span>`;
       }).join('');
@@ -636,10 +636,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       return hasB - hasA;
     });
 
-    const tagsHTML = sortedTags.slice(0, 4).map(t => {
+    const tagsHTML = sortedTags.slice(0, 6).map(t => {
       const icon = getTechIcon(t);
       if (icon) {
-        return `<span class="tag-pill tag-tech" title="${escapeHtml(t)}"><img src="${icon}" alt="${escapeHtml(t)}" class="tag-tech-logo" loading="lazy"><span>${escapeHtml(t)}</span></span>`;
+        return `<span class="tag-pill tag-tech tag-icon-only" title="${escapeHtml(t)}" data-tooltip="${escapeHtml(t)}" aria-label="${escapeHtml(t)}"><img src="${icon}" alt="${escapeHtml(t)}" class="tag-tech-logo" loading="lazy"></span>`;
       }
       return `<span class="tag-pill"><span>${escapeHtml(t)}</span></span>`;
     }).join('');
@@ -908,7 +908,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       modalTech.innerHTML = sortedTechList.map(t => {
         const icon = getTechIcon(t);
         if (icon) {
-          return `<span class="tag-pill tag-tech" style="font-size: 0.82rem; padding: 0.25rem 0.75rem;" title="${escapeHtml(t)}"><img src="${icon}" alt="${escapeHtml(t)}" class="tag-tech-logo" loading="lazy"><span>${escapeHtml(t)}</span></span>`;
+          return `<span class="tag-pill tag-tech tag-icon-only" title="${escapeHtml(t)}" data-tooltip="${escapeHtml(t)}" aria-label="${escapeHtml(t)}"><img src="${icon}" alt="${escapeHtml(t)}" class="tag-tech-logo" loading="lazy"></span>`;
         }
         return `<span class="tag-pill" style="font-size: 0.82rem; padding: 0.25rem 0.75rem;"><span>${escapeHtml(t)}</span></span>`;
       }).join('');
