@@ -1,75 +1,36 @@
-# 🌟 dust9826 Tech Showcase & Portfolio
+# 김정현 · Software, Games & AI
 
-[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-Active-22c55e?style=flat&logo=github)](https://dust9826.github.io/)
-[![Author](https://img.shields.io/badge/Author-Jeonghyeon_Kim-6366f1?style=flat)](https://github.com/dust9826)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[포트폴리오 열기](https://dust9826.github.io/) · [노션 원본](https://www.notion.so/352a22a5543980f5be50d4660a744e8e)
 
-> **공식 웹사이트 바로가기**: [https://dust9826.github.io/](https://dust9826.github.io/)
+게임 시스템, AI·컴퓨터 비전, 웹 개발 프로젝트의 담당 역할과 구현 과정, 검증 결과를 모은 개인 포트폴리오입니다. 2026년 10월 12일 노션 기록과 본인이 확인한 학력·업무 내용을 바탕으로 정리했습니다.
 
-**dust9826 (김정현)**의 깃허브 전체 리포지토리를 기술 도메인별로 분류하고, 각 프로젝트의 아키텍처, 핵심 구현 내용, 기술적 문제 해결 과정을 소개하는 웹 포트폴리오입니다.
+## 구성
 
----
+- 주요 프로젝트 8건과 이전 프로젝트 11건
+- 분야 필터, 프로젝트·기술 검색, 키보드로 이용할 수 있는 상세 대화상자
+- 프로젝트별 노션 기록, 보고서·포스터, 공개 코드 링크
+- 소프트웨어마에스트로, 개발 활동, 업무 경험, 학력과 주요 수상
+- 모바일 화면, 키보드 포커스, 모션 감소 설정 지원
 
-## 🎯 주요 기능
+프로젝트 그림은 내용을 설명하기 위한 개념 스케치입니다. 실제 실행 화면이나 실험 데이터로 제시하지 않습니다.
 
-1. **기술 도메인별 체계적 분류**
-   - 🤖 **AI & Computer Vision**: IPIU 2026 논문, FoundationStereo 거울 기하 복원, MMMU 멀티모달 벤치마크, 객체 분류
-   - 🎮 **Game Dev & Graphics**: Unity 6 멀티플레이어(Photon Fusion 2), UE5 1인칭 공장 자동화, WinAPI 타일맵 에디터, 2D 게임잼 액션
-   - 💻 **Custom Engine & Web**: 순수 WebGL + TypeScript 자체 구현 3D 복셀 엔진 (외부 라이브러리 Zero)
-   - ⚡ **Algorithms & Core CS**: 백준 70+ 고난도 알고리즘(세그먼트 트리, LCA, LIS 등), 알고리즘 템플릿, 객체지향 설계
-   - 📚 **Education & Tools**: 원소 합성을 모티브로 한 게이미피케이션 Git/GitHub 실습 교재 (`coala`)
+## 내용 수정
 
-2. **실시간 인터랙티브 필터링 & 검색**
-   - 도메인 탭 필터 (전체, AI, 게임, 엔진, 알고리즘, 교육)
-   - 실시간 텍스트 검색 (프로젝트명, 설명, 기술 스택, 키워드)
-   - 인기 기술 스택 해시태그 원클릭 필터 (Unity, UE5, C++, C#, Python, TypeScript, WebGL 등)
-   - 추천순 / 최신순 / 이름순 정렬
+- `index.html`: 소개, 경험, 학력, 수상, 연락처
+- `js/data.js`: 프로젝트 내용과 출처. 개인 역할·팀 결과·평가 조건을 구분합니다.
+- `js/app.js`: 필터, 검색, 상세 보기, 개념 도식
+- `css/style.css`: 디자인과 반응형 레이아웃
 
-3. **프로젝트 심층 분석 팝업 (Detail Modal)**
-   - 프로젝트 개요, 개발 기간, 참여 형태 (1인/팀/게임잼)
-   - 핵심 구현 내용 및 성과 체크리스트
-   - 기술적 난제 및 해결 과정 (Deep Dive)
-   - 원클릭 `git clone` 명령어 복사 및 GitHub 저장소 바로가기
+연구 프로젝트의 문서는 **학부 보고서·포스터**이며 학회·학술지 게재 실적이 아닙니다. 거울 검출은 합성 데이터 평가이고, OGAS는 메모리 절감과 실행 속도 결과를 구분해 기재합니다. 새 성과를 반영할 때도 측정 조건과 한계를 함께 남깁니다.
 
-4. **사용자 경험 최적화**
-   - 다크 모드 (Cyber Glow Slate) & 라이트 모드 지원 (로컬스토리지 저장)
-   - 외부 번들러 없이 동작하는 무결점 순수 웹 아키텍처 (GitHub Pages 100% 네이티브 호환)
-   - 반응형 디자인 (데스크톱, 태블릿, 모바일 완벽 대응)
+노션의 자동 동기화 기능은 없습니다. 노션이 수정되면 해당 내용을 확인해 `js/data.js`와 소개 영역에 반영해야 합니다. 이전 사이트의 `js/api.js`는 현재 페이지에서 불러오지 않습니다.
 
----
+## 실행과 배포
 
-## 📂 디렉터리 구조
+외부 빌드 도구나 설치할 패키지 없이 동작하는 정적 HTML/CSS/JavaScript 사이트입니다. 글꼴은 Google Fonts에서 불러오며, 연결되지 않으면 시스템 글꼴을 사용합니다.
 
-```
-dust9826.github.io/
-├── index.html          # 메인 쇼케이스 페이지
-├── css/
-│   └── style.css       # 모던 디자인 시스템, 반응형 레이아웃, 애니메이션
-├── js/
-│   ├── data.js         # 23개 리포지토리 전체 메타데이터 및 분석 정보
-│   └── app.js          # 필터링, 검색, 모달, 클립보드 복사, 테마 제어
-├── assets/
-│   └── favicon.svg     # 벡터 파비콘
-└── README.md
+```sh
+python3 -m http.server 8080
 ```
 
----
-
-## 🚀 로컬 실행 방법
-
-별도의 빌드나 의존성 설치 과정 없이 웹 브라우저에서 바로 열거나 간이 웹 서버로 실행할 수 있습니다.
-
-```bash
-# 1. 저장소 클론
-git clone https://github.com/dust9826/dust9826.github.io.git
-cd dust9826.github.io
-
-# 2. 브라우저에서 바로 열거나 로컬 서버 실행
-# Python이 있는 경우:
-python -m http.server 8000
-
-# Node.js가 있는 경우:
-npx serve .
-```
-
-브라우저에서 `http://localhost:8000` (또는 지정된 포트)에 접속합니다.
+`http://localhost:8080`에서 확인할 수 있습니다. GitHub Pages는 `master` 브랜치의 루트에서 배포합니다. 변경 후 데스크톱·모바일에서 검색, 필터, 상세 열기/닫기, 노션·GitHub 연결을 확인합니다.
